@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "406248677235",
+    "firebase_url": "https://ilaydatabase-default-rtdb.firebaseio.com",
+    "project_id": "ilaydatabase",
+    "storage_bucket": "ilaydatabase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406248677235:android:494431e6171680d20cef06",
+        "android_client_info": {
+          "package_name": "com.alma.ilaymidler_finalproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCza-GQtGjS2HnEJz4DyLhV3eaT1buTay4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
