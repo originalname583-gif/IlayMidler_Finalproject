@@ -2,108 +2,148 @@ package com.alma.ilaymidler_finalproject;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.alma.ilaymidler_finalproject.Model.User;
-import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.alma.ilaymidler_finalproject.Model.Court;
+import com.example.testapp.models.User;
+import com.example.testapp.services.DatabaseService;
+import com.example.testapp.utils.SharedPreferencesUtil;
+import com.example.testapp.utils.Validator;
 
-public class Register extends AppCompatActivity {
+/// Activity for registering the user
+/// This activity is used to register the user
+/// It contains fields for the user to enter their information
+/// It also contains a button to register the user
+/// When the user is registered, they are redirected to the main activity
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private EditText etFirstName, etLastName, etPhone, etGmail, etPassword;
+    private static final String TAG = "RegisterActivity";
+
+    private EditText etEmail, etPassword, etFName, etLName, etPhone;
     private Button btnRegister;
-
-    private DatabaseService databaseService;
+    private TextView tvLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        /// set the layout for the activity
         setContentView(R.layout.activity_register);
 
-        // Connect views
-        etFirstName = findViewById(R.id.etFirstName);
-        etLastName = findViewById(R.id.etLastName);
-        etPhone = findViewById(R.id.etPhone);
-        etGmail = findViewById(R.id.etGmail);
-        etPassword = findViewById(R.id.etPassword);
-        btnRegister = findViewById(R.id.btnRegister);
+        /// get the views
+        etEmail = findViewById(R.id.et_register_email);
+        etPassword = findViewById(R.id.et_register_password);
+        etFName = findViewById(R.id.et_register_first_name);
+        etLName = findViewById(R.id.et_register_last_name);
+        etPhone = findViewById(R.id.et_register_phone);
+        btnRegister = findViewById(R.id.btn_register_register);
+        tvLogin = findViewById(R.id.tv_register_login);
 
-        databaseService = DatabaseService.getInstance();
-
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerUser();
-            }
-        });
+        /// set the click listener
+        btnRegister.setOnClickListener(this);
+        tvLogin.setOnClickListener(this);
     }
 
-    private void registerUser() {
-        String fname = etFirstName.getText().toString().trim();
-        String lname = etLastName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String gmail = etGmail.getText().toString().trim().toLowerCase();
-        String password = etPassword.getText().toString().trim();
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == btnRegister.getId()) {
+            Log.d(TAG, "onClick: Register button clicked");
 
-        // Basic validation
-        if (TextUtils.isEmpty(fname)) {
-            etFirstName.setError("אנא הזן שם פרטי");
-            return;
-        }
-        if (TextUtils.isEmpty(lname)) {
-            etLastName.setError("אנא הזן שם משפחה");
-            return;
-        }
-        if (TextUtils.isEmpty(phone)) {
-            etPhone.setError("אנא הזן מספר טלפון");
-            return;
-        }
-        if (TextUtils.isEmpty(gmail)) {
-            etGmail.setError("אנא הזן Gmail");
-            return;
-        }
-        if (TextUtils.isEmpty(password)) {
-            etPassword.setError("אנא הזן סיסמה");
-            return;
-        }
+            /// get the input from the user
+            String email = etEmail.getText().toString();
+            String password = etPassword.getText().toString();
+            String fName = etFName.getText().toString();
+            String lName = etLName.getText().toString();
+            String phone = etPhone.getText().toString();
 
-        // Check if Gmail already exists
-        databaseService.checkIfEmailExists(gmail, new DatabaseService.DatabaseCallback<Boolean>() {
+          
+            /// Validate input
+            Log.d(TAG, "onClick: Validating input...");
+            if (!checkInput(email, password, fName, lName, phone)) {
+                /// stop if input is invalid
+                return;
+            }
+
+            Log.d(TAG, "onClick: Registering user...");
+
+            /// Register user
+            registerUser(fName, lName, phone, email, password);
+        } else if (v.getId() == tvLogin.getId()) {
+            /// Navigate back to Login Activity
+            finish();
+        }
+    }
+
+
+
+      
+    
+
+    /// Register the user
+    private void registerUser(String fname, String lname, String phone, String email, String password) {
+        Log.d(TAG, "registerUser: Registering user...");
+
+        String uid = databaseService.generateUserId();
+
+        /// create a new user object
+        User user = new User(uid, fname, lname, phone);
+
+        databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(Boolean exists) {
                 if (exists) {
-                    Toast.makeText(Register.this, "המייל כבר קיים", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onCompleted: Email already exists");
+                    /// show error message to user
+                    Toast.makeText(RegisterActivity.this, "Email already exists", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Create new user
-                    String uid = databaseService.generateUserId();
-                    User user = new User(uid, fname, lname, phone, gmail, password);
-
-                    databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override
-                        public void onCompleted(Void object) {
-                            Toast.makeText(Register.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-                            // Go to MainActivity
-                            Intent intent = new Intent(Register.this, MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        }
-
-                        @Override
-                        public void onFailed(Exception e) {
-                            Toast.makeText(Register.this, "שגיאה בהרשמה", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    /// proceed to create the user
+                    createUserInDatabase(user);
                 }
             }
 
             @Override
             public void onFailed(Exception e) {
-                Toast.makeText(Register.this, "שגיאה בבדיקת המייל", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailed: Failed to check if email exists", e);
+                /// show error message to user
+                Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void createUserInDatabase(User user) {
+        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void object) {
+                Log.d(TAG, "createUserInDatabase: User created successfully");
+                /// save the user to shared preferences
+               
+                Log.d(TAG, "createUserInDatabase: Redirecting to MainActivity");
+                /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
+                Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+                /// clear the back stack (clear history) and start the MainActivity
+                mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(mainIntent);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "createUserInDatabase: Failed to create user", e);
+                /// show error message to user
+                Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
+                /// sign out the user if failed to register
+               
             }
         });
     }

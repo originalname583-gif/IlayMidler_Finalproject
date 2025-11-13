@@ -9,7 +9,6 @@
     android:background="#FFFFFF"
     tools:context=".Splash">
 
-    <!-- לוגו מותאם לרוחב ושומר על פרופורציות -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
@@ -25,7 +24,6 @@
         android:layout_marginTop="80dp"
         android:layout_marginBottom="20dp"/>
 
-    <!-- כותרת מעל הסאב טקסט -->
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -44,7 +42,6 @@
         app:layout_constraintBottom_toTopOf="@id/textViewSub"
         android:layout_marginTop="12dp"/>
 
-    <!-- סאב-טקסט -->
     <TextView
         android:id="@+id/textViewSub"
         android:layout_width="wrap_content"
@@ -59,14 +56,13 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="24dp"/>
 
-    <!-- ProgressBar בתחתית -->
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:progressTint="#000000"
+        android:indeterminateTint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

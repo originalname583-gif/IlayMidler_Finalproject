@@ -8,7 +8,7 @@ public class User {
     String gmail;
     String password;
 
-    public User() {
+    public User(String firstName, String lastName, String phone, String email) {
     }
 
     public User(String id, String fname, String lname, String phone, String gmail, String password) {

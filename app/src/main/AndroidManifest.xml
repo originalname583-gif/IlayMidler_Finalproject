@@ -11,28 +11,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.IlayMidler_Finalproject">
-        <activity
-            android:name=".Register"
-            android:exported="false" />
-        <!-- SplashActivity הופך להיות האקטיביטי הראשית -->
+
+        <!-- SplashActivity as launcher with dedicated splash theme -->
         <activity
             android:name=".Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Login"
-            android:exported="false" />
-        <activity
-            android:name=".About"
-            android:exported="false" />
+
+        <!-- Other activities -->
+        <activity android:name=".Register" android:exported="false" />
+        <activity android:name=".Login" android:exported="false" />
+        <activity android:name=".About" android:exported="false" />
+
+        <!-- MainActivity with normal app theme -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.IlayMidler_Finalproject"/>
+
     </application>
 
 </manifest>
