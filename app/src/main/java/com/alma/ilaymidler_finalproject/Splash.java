@@ -16,13 +16,11 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Use main Looper for Handler (safe for Android 12+)
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Start MainActivity with fade animation
             Intent intent = new Intent(Splash.this, MainActivity.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            finish(); // Close SplashActivity
+            finish();
         }, SPLASH_TIME);
     }
 }
