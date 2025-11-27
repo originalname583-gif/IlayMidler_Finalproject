@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alma.ilaymidler_finalproject.Model.User;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -84,6 +85,7 @@ public class DatabaseService {
                 });
     }
 
+
     public void getUserByEmailAndPassword(@NotNull final String gmail, @NotNull final String password, @NotNull final DatabaseCallback<User> callback) {
         readData(USERS_PATH).orderByChild("gmail").equalTo(gmail).get()
                 .addOnCompleteListener(task -> {
@@ -122,5 +124,29 @@ public class DatabaseService {
             });
             callback.onCompleted(users);
         });
+
     }
-}
+    public static void LoginUser(@NotNull final String email, final String password,
+                                 @Nullable final DatabaseCallback<String> callback) {
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+
+                .addOnCompleteListener(task -> {
+
+                    if (task.isSuccessful()) {
+                        Log.d("TAG", "createUserWithEmail:success");
+
+                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        callback.onCompleted(uid);
+
+                    } else {
+                        Log.w("TAG", "createUserWithEmail:failure", task.getException());
+
+                        if (callback != null)
+                            callback.onFailed(task.getException());
+                    }
+                });
+    }
+    }

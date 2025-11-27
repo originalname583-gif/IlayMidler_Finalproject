@@ -3,63 +3,137 @@ package com.alma.ilaymidler_finalproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
-public class Login extends AppCompatActivity {
+import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.google.firebase.auth.FirebaseAuth;
+
+public class Login extends AppCompatActivity implements View.OnClickListener {
+
+    private static final String TAG = "LoginActivity";
 
     private EditText etEmail, etPassword;
     private Button btnLogin;
+    private TextView tvRegister;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        /// set the layout for the activity
         setContentView(R.layout.activity_login);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
-        // חיבור אלמנטים מה־XML
+        /// get the views
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
 
-        // לחיצה על כפתור התחברות
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser();
-            }
-        });
-
+        /// set the click listener
+        btnLogin.setOnClickListener(this);
 
     }
 
-    // פונקציה לבדיקה והתחברות משתמש
-    private void loginUser() {
-        String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == btnLogin.getId()) {
+            Log.d(TAG, "onClick: Login button clicked");
 
-        // בדיקות בסיסיות
-        if (TextUtils.isEmpty(email)) {
-            etEmail.setError("אנא הזן אימייל");
-            return;
+            /// get the email and password entered by the user
+            String email = etEmail.getText().toString();
+            String password = etPassword.getText().toString();
+
+            /// log the email and password
+            Log.d(TAG, "onClick: Email: " + email);
+            Log.d(TAG, "onClick: Password: " + password);
+
+            Log.d(TAG, "onClick: Validating input...");
+            /// Validate input
+            if (!checkInput(email, password)) {
+                /// stop if input is invalid
+                return;
+            }
+
+            Log.d(TAG, "onClick: Logging in user...");
+
+            /// Login user
+            loginUser(email, password);
+        } else if (v.getId() == tvRegister.getId()) {
+            /// Navigate to Register Activity
+            Intent registerIntent = new Intent(Login.this, Register.class);
+            startActivity(registerIntent);
         }
-        if (TextUtils.isEmpty(password)) {
-            etPassword.setError("אנא הזן סיסמה");
-            return;
+    }
+
+    private boolean checkInput(String email, String password) {
+        if (!Validator.isEmailValid(email)) {
+            Log.e(TAG, "checkInput: Invalid email address");
+            /// show error message to user
+            etEmail.setError("Invalid email address");
+            /// set focus to email field
+            etEmail.requestFocus();
+            return false;
         }
 
-        // כאן תוכל להוסיף בדיקה מול שרת / DB
-        Toast.makeText(this, "התחברת בהצלחה!", Toast.LENGTH_SHORT).show();
+        if (!Validator.isPasswordValid(password)) {
+            Log.e(TAG, "checkInput: Invalid password");
+            /// show error message to user
+            etPassword.setError("Password must be at least 6 characters long");
+            /// set focus to password field
+            etPassword.requestFocus();
+            return false;
+        }
 
-        // מעבר למסך הראשי אחרי התחברות
-        Intent intent = new Intent(Login.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+        return true;
+    }
+
+    private void loginUser(String email, String password) {
+        DatabaseService.LoginUser(email, password, new DatabaseService.DatabaseCallback<String>() {
+
+            @Override
+            public void onCompleted(String  uid) {
+                Log.d(TAG, "onCompleted: User logged in: " + uid.toString());
+                /// save the user data to shared preferences
+                // SharedPreferencesUtil.saveUser(LoginActivity.this, user);
+                /// Redirect to main activity and clear back stack to prevent user from going back to login screen
+                Intent mainIntent = new Intent(Login.this, MainActivity.class);
+                /// Clear the back stack (clear history) and start the MainActivity
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(mainIntent);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "onFailed: Failed to retrieve user data", e);
+                /// Show error message to user
+                etPassword.setError("Invalid email or password");
+                etPassword.requestFocus();
+                /// Sign out the user if failed to retrieve user data
+                /// This is to prevent the user from being logged in again
+
+            }
+        });
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
     }
 }
