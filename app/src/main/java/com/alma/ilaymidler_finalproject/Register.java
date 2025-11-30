@@ -1,6 +1,8 @@
 package com.alma.ilaymidler_finalproject;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +28,8 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
     Button btnSubmit;
     private DatabaseService databaseService;
     private FirebaseAuth mAuth;
+    public static final String MyPREFERENCES = "MyPrefs" ;
+    SharedPreferences sharedpreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,8 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
         databaseService=DatabaseService.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -118,6 +124,13 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 /// save the user to shared preferences
 
                 Log.d(TAG, "createUserInDatabase: Redirecting to MainActivity");
+                SharedPreferences.Editor editor = sharedpreferences.edit();
+
+                editor.putString("email", email);
+                editor.putString("password", password);
+
+                editor.commit();
+
                 Intent intent = new Intent(Register.this, MainActivity.class);
 
                 startActivity(intent);

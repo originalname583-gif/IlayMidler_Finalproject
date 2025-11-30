@@ -1,6 +1,8 @@
 package com.alma.ilaymidler_finalproject;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,6 +21,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.text.BreakIterator;
+
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "LoginActivity";
@@ -26,6 +30,11 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     private EditText etEmail, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
+    public static final String MyPREFERENCES = "MyPrefs" ;
+    SharedPreferences sharedpreferences;
+    private BreakIterator etPass2;
+    private String pass2;
+    private String email2;
 
 
     @Override
@@ -39,11 +48,17 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
         /// get the views
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
+        email2=sharedpreferences.getString("email","");
+        pass2=sharedpreferences.getString("password","");
+        etEmail.setText(email2);
+        etPass2.setText(pass2);
+
 
 
         /// set the click listener
@@ -59,6 +74,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             /// get the email and password entered by the user
             String email = etEmail.getText().toString();
             String password = etPassword.getText().toString();
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+
+            editor.putString("email", email);
+            editor.putString("password", password);
+
+            editor.commit();
+
 
             /// log the email and password
             Log.d(TAG, "onClick: Email: " + email);
