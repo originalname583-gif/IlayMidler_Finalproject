@@ -1,82 +1,62 @@
 package com.alma.ilaymidler_finalproject.Model;
 
 public class User {
-    String id;
-    String fname;
-    String lname;
-    String phone;
-    String gmail;
-    String password;
 
-    public User(String firstName, String lastName, String phone, String email) {
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private String password;
+    private boolean isAdmin;
+
+    // Empty constructor required for Firebase
+    public User() {
     }
 
-    public User(String id, String fname, String lname, String phone, String gmail, String password) {
+    // Full constructor
+    public User(String id, String firstName, String lastName, String email, String phone, String password, boolean isAdmin) {
         this.id = id;
-        this.fname = fname;
-        this.lname = lname;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
         this.phone = phone;
-        this.gmail = gmail;
         this.password = password;
+        this.isAdmin = isAdmin;
     }
 
-    public String getId() {
-        return id;
-    }
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public String getFname() {
-        return fname;
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public void setFname(String fname) {
-        this.fname = fname;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getLname() {
-        return lname;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setLname(String lname) {
-        this.lname = lname;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getGmail() {
-        return gmail;
-    }
-
-    public void setGmail(String gmail) {
-        this.gmail = gmail;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public boolean isAdmin() { return isAdmin; }
+    public void setAdmin(boolean admin) { isAdmin = admin; }
 
     @Override
     public String toString() {
         return "User{" +
                 "id='" + id + '\'' +
-                ", fname='" + fname + '\'' +
-                ", lname='" + lname + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
-                ", gmail='" + gmail + '\'' +
                 ", password='" + password + '\'' +
+                ", isAdmin=" + isAdmin +
                 '}';
     }
 }

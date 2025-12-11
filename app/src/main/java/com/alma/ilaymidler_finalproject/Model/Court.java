@@ -1,48 +1,43 @@
 package com.alma.ilaymidler_finalproject.Model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Court {
-    private int id;
+
+    private String id;
     private String name;
-    private String location;
+    private String city;
+    private String address;
     private List<TimeSlot> timeSlots;
 
-    public Court() {
-        this.timeSlots = new ArrayList<>();
-    }
+    public Court() {}
 
-    public Court(int id, String name, String location) {
+    public Court(String id, String name, String city, String address) {
         this.id = id;
         this.name = name;
-        this.location = location;
-        this.timeSlots = new ArrayList<>();
+        this.city = city;
+        this.address = address;
+        this.timeSlots = TimeSlot.generateDefaultTimeslots();
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // GETTERS & SETTERS
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
     public List<TimeSlot> getTimeSlots() { return timeSlots; }
     public void setTimeSlots(List<TimeSlot> timeSlots) { this.timeSlots = timeSlots; }
 
-    public void addTimeSlot(TimeSlot slot) {
-        this.timeSlots.add(slot);
-    }
-
     @Override
     public String toString() {
-        return "Court{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", location='" + location + '\'' +
-                ", timeSlots=" + timeSlots +
-                '}';
+        return name + " - " + city + " (" + address + ")";
     }
 }

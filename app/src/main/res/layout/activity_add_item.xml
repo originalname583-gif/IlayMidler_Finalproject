@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F5F5F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <!-- Back Button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="הוספת מגרש"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            app:layout_constraintTop_toBottomOf="@id/btnBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="10dp" />
+
+        <!-- Item Name -->
+        <EditText
+            android:id="@+id/etItemName"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:hint="שם המגרש"
+            android:padding="15dp"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_edittext"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            android:layout_marginTop="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Item Info -->
+        <EditText
+            android:id="@+id/etItemInfo"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:hint="תיאור / מידע"
+            android:padding="15dp"
+            android:textSize="18sp"
+            android:gravity="top"
+            android:background="@drawable/rounded_edittext"
+            app:layout_constraintTop_toBottomOf="@id/etItemName"
+            android:layout_marginTop="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Location Spinner -->
+        <Spinner
+            android:id="@+id/spLocation"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:background="@drawable/rounded_spinner"
+            android:padding="10dp"
+            android:entries="@array/arlocation"
+            app:layout_constraintTop_toBottomOf="@id/etItemInfo"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Type Spinner (NEW) -->
+        <Spinner
+            android:id="@+id/spType"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:background="@drawable/rounded_spinner"
+            android:padding="10dp"
+            android:entries="@array/arType"
+            app:layout_constraintTop_toBottomOf="@id/spLocation"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Add Button -->
+        <Button
+            android:id="@+id/btnAddItem"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:text="הוסף מגרש"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/rounded_button"
+            android:textColor="#FFFFFF"
+            app:layout_constraintTop_toBottomOf="@id/spType"
+            android:layout_marginTop="35dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
