@@ -25,7 +25,8 @@ public class DatabaseService {
 
     private static final String TAG = "DatabaseService";
     private static final String USERS_PATH = "users",
-                                COURT_PATH = "courts";
+                                COURT_PATH = "courts",
+                                RESERVATIONS_PATH = "reservations";
 
     public interface DatabaseCallback<T> {
         void onCompleted(T object);
@@ -193,13 +194,13 @@ public String generateCourtId() {
 /// @see DatabaseCallback
 /// @see Court
 public void createNewCourt(@NotNull final Court court, @Nullable final DatabaseService.DatabaseCallback<Void> callback) {
-    writeData("COURT_PATH/" + court.getId(), court, callback);
+    writeData(COURT_PATH + "/" + court.getId(), court, callback);
 }
 
 
 
 public void updateUser(@NotNull final User user ,@Nullable final DatabaseService.DatabaseCallback<Void> callback) {
-    writeData("Users/" + user.getId(), user, callback);
+    writeData(USERS_PATH + "/" + user.getId(), user, callback);
 }
 
 
@@ -215,7 +216,7 @@ public void updateUser(@NotNull final User user ,@Nullable final DatabaseService
 /// @see DatabaseCallback
 /// @see Court
 public void getCourt(@NotNull final String courtId, @NotNull final DatabaseCallback<Court> callback) {
-    getData("COURT_PATH"+ "/"+ courtId, Court.class,callback);
+    getData(COURT_PATH + "/" + courtId, Court.class, callback);
 }
 
 
@@ -250,35 +251,27 @@ public void getUsers(@NotNull final DatabaseService.DatabaseCallback<List<User>>
 }
 
 public void deleteUser(String uid, DatabaseService.DatabaseCallback<Void> callback) {
-    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(uid);
-    userRef.removeValue().addOnCompleteListener(task -> {
+    readData(USERS_PATH + "/" + uid).removeValue().addOnCompleteListener(task -> {
         if (task.isSuccessful()) {
-            callback.onCompleted(null);
+            if (callback != null) callback.onCompleted(null);
         } else {
-            callback.onFailed(task.getException());
+            if (callback != null) callback.onFailed(task.getException());
         }
     });
 }
 
 public void saveReservation(Reservation reservation, DatabaseService.DatabaseCallback<Void> callback) {
-    DatabaseReference ref = FirebaseDatabase.getInstance()
-            .getReference("reservations")
-            .child(reservation.getId());
-
-    ref.setValue(reservation)
-            .addOnSuccessListener(aVoid -> callback.onCompleted(null))
-            .addOnFailureListener(callback::onFailed);
+    writeData(RESERVATIONS_PATH + "/" + reservation.getId(), reservation, callback);
 }
 
 public void getReservation(String reservationId, DatabaseService.DatabaseCallback<Reservation> callback) {
-    getData("reservations/"+reservationId, Reservation.class, callback);
+    getData(RESERVATIONS_PATH + "/"+reservationId, Reservation.class, callback);
 }
 
 
 public void getReservations(final DatabaseCallback<List<Reservation>> callback) {
-    getDataList("reservations", Reservation.class,  callback);
+    getDataList(RESERVATIONS_PATH, Reservation.class,  callback);
 }
 
 
 }
-
