@@ -18,11 +18,9 @@ public class AdminPage extends AppCompatActivity {
         btnAddCourt = findViewById(R.id.btnAddCourt);
         btnShowUsers = findViewById(R.id.btnShowUsers);
 
-        // Open AddItem activity
         btnAddCourt.setOnClickListener(v ->
                 startActivity(new Intent(AdminPage.this, AddItem.class)));
 
-        // Show all users
         btnShowUsers.setOnClickListener(v ->
                 startActivity(new Intent(AdminPage.this, ShowUsers.class)));
     }
