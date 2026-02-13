@@ -3,6 +3,7 @@ package com.alma.ilaymidler_finalproject;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ public class AddItem extends AppCompatActivity {
     private EditText etItemName, etItemInfo;
     private Spinner spLocation, spType;
     private Button btnAddItem;
+    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +29,15 @@ public class AddItem extends AppCompatActivity {
         spLocation = findViewById(R.id.spLocation);
         spType = findViewById(R.id.spType);
         btnAddItem = findViewById(R.id.btnAddItem);
+        btnBack = findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(v -> finish());
 
         btnAddItem.setOnClickListener(v -> {
             String name = etItemName.getText().toString().trim();
             String info = etItemInfo.getText().toString().trim();
             String location = spLocation.getSelectedItem().toString();
+            String type = spType.getSelectedItem().toString();
 
             if(name.isEmpty()) {
                 etItemName.setError("Please enter a court name");
@@ -45,7 +51,7 @@ public class AddItem extends AppCompatActivity {
 
             DatabaseService db = DatabaseService.getInstance();
             String courtId = db.generateCourtId();
-            Court court = new Court(courtId, name, location, info);
+            Court court = new Court(courtId, name, location, info, type);
 
             db.createNewCourt(court, new DatabaseService.DatabaseCallback<Void>() {
                 @Override
