@@ -31,7 +31,6 @@ public class Login extends AppCompatActivity {
         String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
         String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
 
-        // Validation
         if (TextUtils.isEmpty(email)) {
             etEmail.setError("Enter email");
             return;
@@ -42,7 +41,6 @@ public class Login extends AppCompatActivity {
             return;
         }
 
-        // Fake login (replace with Firebase later)
         Toast.makeText(this, "Login clicked", Toast.LENGTH_SHORT).show();
     }
 }
