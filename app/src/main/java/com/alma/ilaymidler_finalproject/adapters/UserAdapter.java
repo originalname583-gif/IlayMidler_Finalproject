@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alma.ilaymidler_finalproject.R;
 import com.alma.ilaymidler_finalproject.Model.User;
+import com.alma.ilaymidler_finalproject.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,27 +42,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         User user = userList.get(position);
         if (user == null) return;
 
-        holder.tvName.setText(user.getFirstName() + " " + user.getLastName());
-        holder.tvEmail.setText(user.getEmail());
-        holder.tvPhone.setText(user.getPhone());
+        String firstName = user.getFirstName() != null ? user.getFirstName() : "";
+        String lastName = user.getLastName() != null ? user.getLastName() : "";
+        String email = user.getEmail() != null ? user.getEmail() : "";
+        String phone = user.getPhone() != null ? user.getPhone() : "";
 
-        // initials
+        holder.tvName.setText((firstName + " " + lastName).trim());
+        holder.tvEmail.setText(email);
+        holder.tvPhone.setText(phone);
+
         String initials = "";
-        if (user.getFirstName() != null && !user.getFirstName().isEmpty())
-            initials += user.getFirstName().charAt(0);
-        if (user.getLastName() != null && !user.getLastName().isEmpty())
-            initials += user.getLastName().charAt(0);
+        if (!firstName.isEmpty()) initials += firstName.charAt(0);
+        if (!lastName.isEmpty()) initials += lastName.charAt(0);
 
         holder.tvInitials.setText(initials.toUpperCase());
 
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null)
-                listener.onUserClick(user);
+            if (listener != null) listener.onUserClick(user);
         });
 
         holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null)
-                listener.onLongUserClick(user);
+            if (listener != null) listener.onLongUserClick(user);
             return true;
         });
     }
@@ -74,7 +74,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public void setUserList(List<User> users) {
         userList.clear();
-        userList.addAll(users);
+        if (users != null) {
+            userList.addAll(users);
+        }
         notifyDataSetChanged();
     }
 

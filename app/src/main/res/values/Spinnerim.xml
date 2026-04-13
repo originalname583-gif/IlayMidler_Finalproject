@@ -27,12 +27,11 @@
         <item>טבריה</item>
         <item>אילת</item>
     </string-array>
-    <string-array name="arType">
 
+    <string-array name="arType">
         <item>אספלט</item>
         <item>דשא</item>
     </string-array>
-
 
 
 

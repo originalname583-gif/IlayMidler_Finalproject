@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="6dp">
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,51 +16,50 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Initials Circle -->
         <TextView
             android:id="@+id/tv_user_initials"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:background="@drawable/bg_initials_circle"
             android:gravity="center"
             android:text="AB"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_initials_circle"/>
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <!-- User Info -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="20dp">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Full Name"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#34495E"/>
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_user_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="email@gmail.com"
-                android:textSize="16sp"
-                android:textColor="#7F8C8D"/>
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tv_user_phone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="050-0000000"
-                android:textSize="16sp"
-                android:textColor="#95A5A6"/>
-
+                android:layout_marginTop="3dp"
+                android:text="0500000000"
+                android:textColor="@color/text_hint"
+                android:textSize="14sp" />
         </LinearLayout>
 
     </LinearLayout>

@@ -3,7 +3,6 @@ package com.alma.ilaymidler_finalproject;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -17,7 +16,6 @@ public class AddItem extends AppCompatActivity {
     private EditText etItemName, etItemInfo;
     private Spinner spLocation, spType;
     private Button btnAddItem;
-    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,22 +27,19 @@ public class AddItem extends AppCompatActivity {
         spLocation = findViewById(R.id.spLocation);
         spType = findViewById(R.id.spType);
         btnAddItem = findViewById(R.id.btnAddItem);
-        btnBack = findViewById(R.id.btnBack);
-
-        btnBack.setOnClickListener(v -> finish());
 
         btnAddItem.setOnClickListener(v -> {
             String name = etItemName.getText().toString().trim();
             String info = etItemInfo.getText().toString().trim();
-            String location = spLocation.getSelectedItem().toString();
-            String type = spType.getSelectedItem().toString();
+            String location = spLocation.getSelectedItem() != null ? spLocation.getSelectedItem().toString() : "";
+            String type = spType.getSelectedItem() != null ? spType.getSelectedItem().toString() : "";
 
-            if(name.isEmpty()) {
+            if (name.isEmpty()) {
                 etItemName.setError("Please enter a court name");
                 return;
             }
 
-            if(info.isEmpty()) {
+            if (info.isEmpty()) {
                 etItemInfo.setError("Please enter court info");
                 return;
             }
@@ -56,13 +51,13 @@ public class AddItem extends AppCompatActivity {
             db.createNewCourt(court, new DatabaseService.DatabaseCallback<Void>() {
                 @Override
                 public void onCompleted(Void object) {
-                    Toast.makeText(AddItem.this, "Court added successfully: " + name, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddItem.this, "Court added successfully", Toast.LENGTH_SHORT).show();
                     finish();
                 }
 
                 @Override
                 public void onFailed(Exception e) {
-                    Toast.makeText(AddItem.this, "Failed to add court.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddItem.this, "Failed to add court", Toast.LENGTH_SHORT).show();
                 }
             });
         });

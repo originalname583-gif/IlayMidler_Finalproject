@@ -23,11 +23,12 @@ import com.google.firebase.auth.FirebaseAuth;
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "Register";
+    public static final String MyPREFERENCES = "MyPrefs";
+
     private EditText etFname, etLname, etMail, etPhone, etPassword;
     private Button btnSubmit;
     private DatabaseService databaseService;
     private FirebaseAuth mAuth;
-    public static final String MyPREFERENCES = "MyPrefs";
     private SharedPreferences sharedpreferences;
 
     @Override
@@ -59,36 +60,31 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == btnSubmit.getId()) {
-            String fName = etFname.getText().toString().trim();
-            String lName = etLname.getText().toString().trim();
-            String email = etMail.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
+        String fName = etFname.getText().toString().trim();
+        String lName = etLname.getText().toString().trim();
+        String email = etMail.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-            if(fName.isEmpty() || lName.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()){
-                Toast.makeText(this, "אנא מלא את כל השדות", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            registerUser(fName, lName, phone, email, password);
+        if (fName.isEmpty() || lName.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "אנא מלא את כל השדות", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        registerUser(fName, lName, phone, email, password);
     }
 
     private void registerUser(String fname, String lname, String phone, String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(authTask -> {
-                    if (!authTask.isSuccessful()) {
+                    if (!authTask.isSuccessful() || mAuth.getCurrentUser() == null) {
                         Toast.makeText(Register.this, "Email already exists or invalid!", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "FirebaseAuth Error: ", authTask.getException());
                         return;
                     }
 
                     String uid = mAuth.getCurrentUser().getUid();
-
-                    // Create User object with firstName, lastName, phone
                     User user = new User(uid, fname, lname, email, phone, password, false);
-
                     createUserInDatabase(user);
                 });
     }
@@ -97,22 +93,16 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
         databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void object) {
-                Log.d(TAG, "User saved successfully");
-
                 SharedPreferences.Editor editor = sharedpreferences.edit();
                 editor.putString("email", user.getEmail());
-                editor.putString("password", user.getPassword());
                 editor.apply();
 
-                // After registration, go to UserPage (non-admin by default)
-                Intent intent = new Intent(Register.this, UserPage.class);
-                startActivity(intent);
+                startActivity(new Intent(Register.this, UserPage.class));
                 finish();
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "Failed to create user", e);
                 Toast.makeText(Register.this, "Failed to register user", Toast.LENGTH_SHORT).show();
             }
         });

@@ -13,20 +13,26 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DatabaseService {
 
     private static final String TAG = "DatabaseService";
-    private static final String USERS_PATH = "users",
-                                COURT_PATH = "courts",
-                                RESERVATIONS_PATH = "reservations";
+    private static final String USERS_PATH = "users";
+    private static final String COURT_PATH = "courts";
+    private static final String RESERVATIONS_PATH = "reservations";
 
     public interface DatabaseCallback<T> {
         void onCompleted(T object);
@@ -52,7 +58,8 @@ public class DatabaseService {
         return databaseReference.child(path);
     }
 
-    private void writeData(@NotNull final String path, @NotNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
+    private void writeData(@NotNull final String path, @NotNull final Object data,
+                           @Nullable final DatabaseCallback<Void> callback) {
         readData(path).setValue(data, (error, ref) -> {
             if (error != null) {
                 if (callback != null) callback.onFailed(error.toException());
@@ -62,19 +69,10 @@ public class DatabaseService {
         });
     }
 
-
-
-
-    /// get data from the database at a specific path
-    /// @param path the path to get the data from
-    /// @param clazz the class of the object to return
-    /// @param callback the callback to call when the operation is completed
-    /// @see DatabaseCallback
-    /// @see Class
-    public <T> void getData(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<T> callback) {
+    public <T> void getData(@NotNull final String path, @NotNull final Class<T> clazz,
+                            @NotNull final DatabaseCallback<T> callback) {
         readData(path).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
@@ -83,195 +81,197 @@ public class DatabaseService {
         });
     }
 
-    /// get a list of data from the database at a specific path
-    /// @param path the path to get the data from
-    /// @param clazz the class of the objects to return
-    /// @param callback the callback to call when the operation is completed
-    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<List<T>> callback) {
+    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz,
+                                 @NotNull final DatabaseCallback<List<T>> callback) {
         readData(path).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
-            List<T> tList = new ArrayList<>();
-            task.getResult().getChildren().forEach(dataSnapshot -> {
-                T t = dataSnapshot.getValue(clazz);
-                tList.add(t);
-            });
 
+            List<T> tList = new ArrayList<>();
+            for (DataSnapshot dataSnapshot : task.getResult().getChildren()) {
+                T t = dataSnapshot.getValue(clazz);
+                if (t != null) tList.add(t);
+            }
             callback.onCompleted(tList);
         });
     }
-
-    /// generate a new id for a new object in the database
-    /// @param path the path to generate the id for
-    /// @return a new id for the object
-    /// @see String
-    /// @see DatabaseReference#push()
-
-
-
-
-
-
-
-
 
     private String generateNewId(@NotNull final String path) {
         return databaseReference.child(path).push().getKey();
     }
 
-    // ===================== USER SECTION =====================
+    public String generateCourtId() {
+        return generateNewId(COURT_PATH);
+    }
 
-  
     public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
         writeData(USERS_PATH + "/" + user.getId(), user, callback);
     }
 
+    public void getUser(@NotNull String uid, @NotNull DatabaseCallback<User> callback) {
+        getData(USERS_PATH + "/" + uid, User.class, callback);
+    }
 
-
-  
+    public void updateUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
+        writeData(USERS_PATH + "/" + user.getId(), user, callback);
+    }
 
     public void getUserList(@NotNull final DatabaseCallback<List<User>> callback) {
-        readData(USERS_PATH).get().addOnCompleteListener(task -> {
+        getDataList(USERS_PATH, User.class, callback);
+    }
+
+    public void deleteUser(String uid, DatabaseCallback<Void> callback) {
+        readData(USERS_PATH + "/" + uid).removeValue().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (callback != null) callback.onCompleted(null);
+            } else {
+                if (callback != null) callback.onFailed(task.getException());
+            }
+        });
+    }
+
+    public static void LoginUser(@NotNull final String email, final String password,
+                                 @Nullable final DatabaseCallback<String> callback) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                if (callback != null) callback.onCompleted(uid);
+            } else {
+                if (callback != null) callback.onFailed(task.getException());
+            }
+        });
+    }
+
+    public void createNewCourt(@NotNull final Court court, @Nullable final DatabaseCallback<Void> callback) {
+        writeData(COURT_PATH + "/" + court.getId(), court, callback);
+    }
+
+    public void getCourt(@NotNull final String courtId, @NotNull final DatabaseCallback<Court> callback) {
+        getData(COURT_PATH + "/" + courtId, Court.class, callback);
+    }
+
+    public void getCourtsList(@NotNull final DatabaseCallback<List<Court>> callback) {
+        getDataList(COURT_PATH, Court.class, callback);
+    }
+
+    public void getUsers(@NotNull final DatabaseCallback<List<User>> callback) {
+        getDataList(USERS_PATH, User.class, callback);
+    }
+
+    public void setUserAdmin(@NonNull String userId, boolean isAdmin, @Nullable DatabaseCallback<Void> callback) {
+        readData(USERS_PATH + "/" + userId + "/admin").setValue(isAdmin, (error, ref) -> {
+            if (error != null) {
+                if (callback != null) callback.onFailed(error.toException());
+            } else {
+                if (callback != null) callback.onCompleted(null);
+            }
+        });
+
+        readData(USERS_PATH + "/" + userId + "/isAdmin").setValue(isAdmin);
+    }
+
+    public static String getTodayDate() {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+    }
+
+    public void getReservationsForCourtOnDate(@NonNull String courtId, @NonNull String date,
+                                              @NonNull DatabaseCallback<Map<String, Reservation>> callback) {
+        readData(RESERVATIONS_PATH + "/" + date + "/" + courtId).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
-            List<User> users = new ArrayList<>();
-            task.getResult().getChildren().forEach(snapshot -> {
-                User user = snapshot.getValue(User.class);
-                if (user != null) users.add(user);
-            });
-            callback.onCompleted(users);
+
+            Map<String, Reservation> result = new HashMap<>();
+            for (DataSnapshot snap : task.getResult().getChildren()) {
+                Reservation reservation = snap.getValue(Reservation.class);
+                if (reservation != null) {
+                    result.put(snap.getKey(), reservation);
+                }
+            }
+            callback.onCompleted(result);
         });
-
     }
-    public static void LoginUser(@NotNull final String email, final String password,
-                                 @Nullable final DatabaseCallback<String> callback) {
 
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    public void reserveCourtSlot(@NonNull Court court,
+                                 @NonNull String userId,
+                                 @NonNull String userName,
+                                 @NonNull String slotId,
+                                 @NonNull String startTime,
+                                 @NonNull String endTime,
+                                 @NonNull DatabaseCallback<String> callback) {
 
-        mAuth.signInWithEmailAndPassword(email, password)
+        String today = getTodayDate();
+        DatabaseReference dayCourtRef = readData(RESERVATIONS_PATH + "/" + today + "/" + court.getId());
+        AtomicReference<String> failReason = new AtomicReference<>("");
 
-                .addOnCompleteListener(task -> {
+        dayCourtRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                int userReservationCount = 0;
 
-                    if (task.isSuccessful()) {
-                        Log.d("TAG", "createUserWithEmail:success");
-
-                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                        callback.onCompleted(uid);
-
-                    } else {
-                        Log.w("TAG", "createUserWithEmail:failure", task.getException());
-
-                        if (callback != null)
-                            callback.onFailed(task.getException());
+                for (MutableData child : currentData.getChildren()) {
+                    Object value = child.getValue();
+                    if (value instanceof Map) {
+                        Object savedUserId = ((Map<?, ?>) value).get("userId");
+                        if (userId.equals(savedUserId)) {
+                            userReservationCount++;
+                        }
                     }
-                });
+                }
+
+                if (userReservationCount >= 2) {
+                    failReason.set("You can reserve up to 2 time slots only.");
+                    return Transaction.abort();
+                }
+
+                MutableData slotNode = currentData.child(slotId);
+                if (slotNode.getValue() != null) {
+                    failReason.set("This slot is already reserved.");
+                    return Transaction.abort();
+                }
+
+                String reservationId = dayCourtRef.push().getKey();
+
+                Map<String, Object> reservationMap = new HashMap<>();
+                reservationMap.put("id", reservationId);
+                reservationMap.put("courtId", court.getId());
+                reservationMap.put("userId", userId);
+                reservationMap.put("userName", userName);
+                reservationMap.put("slotId", slotId);
+                reservationMap.put("startTime", startTime);
+                reservationMap.put("endTime", endTime);
+                reservationMap.put("bookingDate", today);
+                reservationMap.put("createdAt", System.currentTimeMillis());
+
+                slotNode.setValue(reservationMap);
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed,
+                                   @Nullable DataSnapshot currentData) {
+                if (error != null) {
+                    callback.onFailed(error.toException());
+                    return;
+                }
+
+                if (!committed) {
+                    callback.onFailed(new Exception(
+                            failReason.get() == null || failReason.get().isEmpty()
+                                    ? "Reservation failed."
+                                    : failReason.get()
+                    ));
+                    return;
+                }
+
+                callback.onCompleted("Reservation completed successfully.");
+            }
+        });
     }
-
-
-
-/// generate a new id for a new court in the database
-/// @return a new id for the court
-/// @see #generateNewId(String)
-/// @see Court
-public String generateCourtId() {
-    return generateNewId(COURT_PATH);
-}
-
-
-
-/// create a new court in the database
-/// @param court the court object to create
-/// @param callback the callback to call when the operation is completed
-///              the callback will receive void
-///             if the operation fails, the callback will receive an exception
-/// @return void
-/// @see DatabaseCallback
-/// @see Court
-public void createNewCourt(@NotNull final Court court, @Nullable final DatabaseService.DatabaseCallback<Void> callback) {
-    writeData(COURT_PATH + "/" + court.getId(), court, callback);
-}
-
-
-
-public void updateUser(@NotNull final User user ,@Nullable final DatabaseService.DatabaseCallback<Void> callback) {
-    writeData(USERS_PATH + "/" + user.getId(), user, callback);
-}
-
-
-
-
-
-/// get a court from the database
-/// @param courtId the id of the court to get
-/// @param callback the callback to call when the operation is completed
-///               the callback will receive the court object
-///              if the operation fails, the callback will receive an exception
-/// @return void
-/// @see DatabaseCallback
-/// @see Court
-public void getCourt(@NotNull final String courtId, @NotNull final DatabaseCallback<Court> callback) {
-    getData(COURT_PATH + "/" + courtId, Court.class, callback);
-}
-
-
-
-
-/// get all the courts from the database
-/// @param callback the callback to call when the operation is completed
-///              the callback will receive a list of court objects
-///            if the operation fails, the callback will receive an exception
-/// @return void
-/// @see DatabaseCallback
-/// @see List
-/// @see Court
-/// @see #getData(String, Class, DatabaseCallback)
-public void getCourtsList(@NotNull final DatabaseCallback<List<Court>> callback) {
-    getDataList(COURT_PATH, Court.class, callback);
-}
-
-
-
-/// get all the users from the database
-/// @param callback the callback to call when the operation is completed
-///              the callback will receive a list of court objects
-///            if the operation fails, the callback will receive an exception
-/// @return void
-/// @see DatabaseCallback
-/// @see List
-/// @see Court
-/// @see #getData(String, Class, DatabaseCallback)
-public void getUsers(@NotNull final DatabaseService.DatabaseCallback<List<User>> callback) {
-    getDataList(USERS_PATH, User.class, callback);
-}
-
-public void deleteUser(String uid, DatabaseService.DatabaseCallback<Void> callback) {
-    readData(USERS_PATH + "/" + uid).removeValue().addOnCompleteListener(task -> {
-        if (task.isSuccessful()) {
-            if (callback != null) callback.onCompleted(null);
-        } else {
-            if (callback != null) callback.onFailed(task.getException());
-        }
-    });
-}
-
-public void saveReservation(Reservation reservation, DatabaseService.DatabaseCallback<Void> callback) {
-    writeData(RESERVATIONS_PATH + "/" + reservation.getId(), reservation, callback);
-}
-
-public void getReservation(String reservationId, DatabaseService.DatabaseCallback<Reservation> callback) {
-    getData(RESERVATIONS_PATH + "/"+reservationId, Reservation.class, callback);
-}
-
-
-public void getReservations(final DatabaseCallback<List<Reservation>> callback) {
-    getDataList(RESERVATIONS_PATH, Reservation.class,  callback);
-}
-
-
 }

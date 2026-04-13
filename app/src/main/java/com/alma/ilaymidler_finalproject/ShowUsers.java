@@ -1,16 +1,17 @@
 package com.alma.ilaymidler_finalproject;
 
-import android.content.Intent;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alma.ilaymidler_finalproject.adapters.UserAdapter;
 import com.alma.ilaymidler_finalproject.Model.User;
+import com.alma.ilaymidler_finalproject.adapters.UserAdapter;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
 
 import java.util.List;
@@ -38,14 +39,14 @@ public class ShowUsers extends AppCompatActivity {
         userAdapter = new UserAdapter(new UserAdapter.OnUserClickListener() {
             @Override
             public void onUserClick(User user) {
-                Intent intent = new Intent(ShowUsers.this, UserPage.class);
-                intent.putExtra("USER_UID", user.getId());
-                startActivity(intent);
+                Toast.makeText(ShowUsers.this,
+                        user.isAdmin() ? "Admin user" : "Regular user",
+                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onLongUserClick(User user) {
-                Log.d(TAG, "Long click: " + user.getEmail());
+                showAdminDialog(user);
             }
         });
 
@@ -55,7 +56,10 @@ public class ShowUsers extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        loadUsers();
+    }
 
+    private void loadUsers() {
         databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
             @Override
             public void onCompleted(List<User> users) {
@@ -68,5 +72,30 @@ public class ShowUsers extends AppCompatActivity {
                 Log.e(TAG, "Failed loading users", e);
             }
         });
+    }
+
+    private void showAdminDialog(User user) {
+        String action = user.isAdmin() ? "Remove admin access" : "Make admin";
+
+        new AlertDialog.Builder(this)
+                .setTitle(user.getFirstName() + " " + user.getLastName())
+                .setMessage(action + "?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    databaseService.setUserAdmin(user.getId(), !user.isAdmin(),
+                            new DatabaseService.DatabaseCallback<Void>() {
+                                @Override
+                                public void onCompleted(Void object) {
+                                    Toast.makeText(ShowUsers.this, "Updated successfully", Toast.LENGTH_SHORT).show();
+                                    loadUsers();
+                                }
+
+                                @Override
+                                public void onFailed(Exception e) {
+                                    Toast.makeText(ShowUsers.this, "Failed to update admin", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }
