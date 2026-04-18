@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,7 +15,7 @@ import com.alma.ilaymidler_finalproject.services.DatabaseService;
 
 import java.util.List;
 
-public class ShowUsers extends AppCompatActivity {
+public class ShowUsers extends BaseMenuActivity {
 
     private static final String TAG = "ShowUsers";
 
@@ -28,6 +27,8 @@ public class ShowUsers extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_users);
+
+        setupToolbar(R.id.topToolbar, "Users");
 
         databaseService = DatabaseService.getInstance();
 

@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -20,7 +19,7 @@ import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class Register extends AppCompatActivity implements View.OnClickListener {
+public class Register extends BaseMenuActivity implements View.OnClickListener {
 
     private static final String TAG = "Register";
     public static final String MyPREFERENCES = "MyPrefs";
@@ -37,11 +36,16 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        setupToolbar(R.id.topToolbar, "Register");
+
+        View mainView = findViewById(R.id.main);
+        if (mainView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
 
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
@@ -67,7 +71,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
         String password = etPassword.getText().toString().trim();
 
         if (fName.isEmpty() || lName.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "אנא מלא את כל השדות", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 

@@ -55,7 +55,7 @@ public class TimeSlot {
     public String getReservedByUserId() { return reservedByUserId; }
 
     public void setReservedByUserId(String reservedByUserId) {
-        this.reservedByUserId = reservedByUserId;
-        this.reserved = reservedByUserId != null && !reservedByUserId.isEmpty();
+        this.reservedByUserId = reservedByUserId != null ? reservedByUserId : "";
+        this.reserved = !this.reservedByUserId.isEmpty();
     }
 }

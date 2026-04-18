@@ -30,11 +30,11 @@ public class NotificationHelper {
         }
     }
 
-    public static void showReservationNotification(Context context, String courtName, String start, String end) {
+    public static void showReservationNotification(Context context, String courtName, String date, String start, String end) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("Reservation confirmed")
-                .setContentText(courtName + " | " + start + " - " + end)
+                .setContentText(courtName + " | " + date + " | " + start + " - " + end)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
 

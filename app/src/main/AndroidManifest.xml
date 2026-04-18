@@ -13,53 +13,52 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.IlayMidler_Finalproject">
-
+        <activity
+            android:name=".ManageCourtsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MyReservationsActivity"
+            android:exported="false" />
         <activity
             android:name=".CourtDetailsActivity"
             android:exported="false" />
-
         <activity
             android:name=".ShowUsers"
             android:exported="false" />
-
         <activity
             android:name=".AdminPage"
             android:exported="false" />
-
         <activity
             android:name=".AddItem"
             android:exported="false" />
-
         <activity
             android:name=".UserPage"
             android:exported="false" />
-
         <activity
             android:name=".Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Register"
             android:exported="false" />
-
         <activity
             android:name=".Login"
             android:exported="false" />
-
         <activity
             android:name=".About"
             android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:theme="@style/Theme.IlayMidler_Finalproject" />
-
     </application>
 
 </manifest>

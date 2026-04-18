@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Main brand -->
     <color name="primary">#2563EB</color>
     <color name="primary_dark">#1D4ED8</color>
     <color name="accent_blue">#2563EB</color>
 
-    <!-- Status -->
     <color name="success">#16A34A</color>
     <color name="danger">#DC2626</color>
 
-    <!-- Background / surfaces -->
     <color name="background">#F1F5F9</color>
     <color name="surface">#FFFFFF</color>
     <color name="surface_soft">#EEF4FF</color>
 
-    <!-- Text -->
     <color name="text_primary">#0F172A</color>
     <color name="text_title">#0F172A</color>
     <color name="text_body">#334155</color>
@@ -24,8 +20,9 @@
     <color name="text_hint">#94A3B8</color>
     <color name="text_light">#94A3B8</color>
 
-    <!-- Basics -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="info_blue">#3B82F6</color>
+    <color name="danger_soft">#FEE2E2</color>
 
 </resources>

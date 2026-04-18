@@ -5,9 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseMenuActivity implements View.OnClickListener {
 
     Button btnAbout, btnRegister, btnLogin;
 
@@ -15,6 +13,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupToolbar(R.id.topToolbar, "FieldTime");
 
         btnAbout = findViewById(R.id.btnAbout);
         btnRegister = findViewById(R.id.btnRegister);

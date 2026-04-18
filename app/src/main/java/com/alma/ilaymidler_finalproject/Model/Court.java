@@ -11,7 +11,6 @@ public class Court {
     private String type;
     private List<TimeSlot> timeSlots;
 
-    // Required for Firebase
     public Court() {
     }
 
@@ -21,10 +20,8 @@ public class Court {
         this.city = city;
         this.address = address;
         this.type = type;
-        this.timeSlots = TimeSlot.generateDailySlots(); // ✅ FIXED HERE
+        this.timeSlots = TimeSlot.generateDailySlots();
     }
-
-    // GETTERS & SETTERS
 
     public String getId() {
         return id;
@@ -68,7 +65,7 @@ public class Court {
 
     public List<TimeSlot> getTimeSlots() {
         if (timeSlots == null) {
-            timeSlots = TimeSlot.generateDailySlots(); // ✅ important fallback
+            timeSlots = TimeSlot.generateDailySlots();
         }
         return timeSlots;
     }

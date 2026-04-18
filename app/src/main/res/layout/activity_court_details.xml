@@ -8,97 +8,116 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:orientation="vertical">
 
-        <androidx.cardview.widget.CardView
+        <include layout="@layout/include_top_toolbar" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="@color/surface"
-            xmlns:app="http://schemas.android.com/apk/res-auto">
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <LinearLayout
+            <androidx.cardview.widget.CardView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                app:cardCornerRadius="24dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@color/surface">
 
-                <TextView
-                    android:id="@+id/tvCourtName"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Court Name"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_title" />
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-                <TextView
-                    android:id="@+id/tvCourtAddress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Court address"
-                    android:textSize="15sp"
-                    android:textColor="@color/text_body" />
+                    <TextView
+                        android:id="@+id/tvCourtName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Court Name"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_title" />
 
-                <TextView
-                    android:id="@+id/tvCourtType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Grass"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary"
-                    android:background="@drawable/rounded_button_outline"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp" />
+                    <TextView
+                        android:id="@+id/tvCourtAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Court address"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_body" />
 
-                <TextView
-                    android:id="@+id/tvDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:text="Today"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_muted" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/tvCourtType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Grass"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:background="@drawable/rounded_button_outline"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Available Time Slots"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_title" />
+                    <TextView
+                        android:id="@+id/tvDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="Selected date"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_muted" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Each user can reserve up to 2 time slots"
-            android:textSize="14sp"
-            android:textColor="@color/text_muted" />
+                    <Button
+                        android:id="@+id/btnChooseDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/rounded_button_outline"
+                        android:text="Choose Reservation Date"
+                        android:textAllCaps="false"
+                        android:textColor="@color/text_title"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="14dp"
-            android:visibility="gone" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Available Time Slots"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_title" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTimeSlots"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:nestedScrollingEnabled="false" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Each user can reserve up to 2 time slots for the selected date"
+                android:textSize="14sp"
+                android:textColor="@color/text_muted" />
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="14dp"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTimeSlots"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

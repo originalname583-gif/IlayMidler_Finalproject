@@ -35,17 +35,18 @@
                 android:id="@+id/tvSlotStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Available now"
+                android:layout_marginTop="6dp"
+                android:text="Available"
                 android:textSize="13sp"
-                android:textColor="@color/text_muted" />
+                android:textStyle="bold"
+                android:textColor="@color/success" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnReserve"
             android:layout_width="110dp"
             android:layout_height="44dp"
-            android:background="@drawable/rounded_button"
+            android:background="@drawable/rounded_button_success"
             android:text="Reserve"
             android:textAllCaps="false"
             android:textColor="@color/white"

@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alma.ilaymidler_finalproject.Model.TimeSlot;
@@ -49,18 +50,25 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.TimeSl
         if (slot.isReserved()) {
             if (currentUserId.equals(slot.getReservedByUserId())) {
                 holder.tvSlotStatus.setText("Reserved by you");
+                holder.tvSlotStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary));
                 holder.btnReserve.setText("Reserved");
+                holder.btnReserve.setBackgroundResource(R.drawable.rounded_button_reserved_you);
             } else {
                 holder.tvSlotStatus.setText("Already taken");
+                holder.tvSlotStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.danger));
                 holder.btnReserve.setText("Unavailable");
+                holder.btnReserve.setBackgroundResource(R.drawable.rounded_button_taken);
             }
 
             holder.btnReserve.setEnabled(false);
-            holder.btnReserve.setAlpha(0.65f);
+            holder.btnReserve.setAlpha(1f);
             holder.btnReserve.setOnClickListener(null);
+
         } else {
-            holder.tvSlotStatus.setText("Available now");
+            holder.tvSlotStatus.setText("Available");
+            holder.tvSlotStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.success));
             holder.btnReserve.setText("Reserve");
+            holder.btnReserve.setBackgroundResource(R.drawable.rounded_button_success);
             holder.btnReserve.setEnabled(true);
             holder.btnReserve.setAlpha(1f);
             holder.btnReserve.setOnClickListener(v -> {

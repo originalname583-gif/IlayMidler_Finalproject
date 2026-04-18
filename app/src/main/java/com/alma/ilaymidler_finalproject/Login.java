@@ -7,13 +7,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class Login extends AppCompatActivity {
+public class Login extends BaseMenuActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;
@@ -24,6 +22,8 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        setupToolbar(R.id.topToolbar, "Login");
 
         mAuth = FirebaseAuth.getInstance();
         databaseService = DatabaseService.getInstance();

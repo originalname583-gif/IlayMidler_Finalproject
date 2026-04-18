@@ -1,12 +1,10 @@
 package com.alma.ilaymidler_finalproject;
 
-import android.content.Context;
-
 import com.google.firebase.auth.FirebaseAuth;
 
 public class Validator {
 
-    private FirebaseAuth mAuth;
+    private final FirebaseAuth mAuth;
 
     public interface LoginCallback {
         void onSuccess();
@@ -17,7 +15,6 @@ public class Validator {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    // Check field not empty
     public static boolean isEmailValid(String email) {
         return email != null && !email.trim().isEmpty();
     }
@@ -26,15 +23,16 @@ public class Validator {
         return password != null && !password.trim().isEmpty();
     }
 
-    // Firebase login (checks if account exists!)
     public void loginUser(String email, String password, LoginCallback callback) {
-
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        callback.onSuccess();  // email + password match an account
+                        callback.onSuccess();
                     } else {
-                        callback.onFailure(task.getException().getMessage());
+                        String message = task.getException() != null
+                                ? task.getException().getMessage()
+                                : "Login failed";
+                        callback.onFailure(message);
                     }
                 });
     }

@@ -8,73 +8,81 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <include layout="@layout/include_top_toolbar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add New Court"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary" />
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Create a court users can discover and reserve."
-            android:textSize="15sp"
-            android:textColor="@color/text_secondary" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add New Court"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
 
-        <EditText
-            android:id="@+id/etItemName"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/rounded_edittext"
-            android:hint="Court name"
-            android:paddingHorizontal="16dp"
-            android:textColorHint="@color/text_hint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Create a court users can discover and reserve."
+                android:textSize="15sp"
+                android:textColor="@color/text_secondary" />
 
-        <EditText
-            android:id="@+id/etItemInfo"
-            android:layout_width="match_parent"
-            android:layout_height="96dp"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/rounded_edittext"
-            android:gravity="top"
-            android:hint="Address / description"
-            android:padding="16dp"
-            android:textColorHint="@color/text_hint" />
+            <EditText
+                android:id="@+id/etItemName"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/rounded_edittext"
+                android:hint="Court name"
+                android:paddingHorizontal="16dp"
+                android:textColorHint="@color/text_hint" />
 
-        <Spinner
-            android:id="@+id/spLocation"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/rounded_spinner"
-            android:entries="@array/arlocation" />
+            <EditText
+                android:id="@+id/etItemInfo"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/rounded_edittext"
+                android:gravity="top"
+                android:hint="Address / description"
+                android:padding="16dp"
+                android:textColorHint="@color/text_hint" />
 
-        <Spinner
-            android:id="@+id/spType"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/rounded_spinner"
-            android:entries="@array/arType" />
+            <Spinner
+                android:id="@+id/spLocation"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/rounded_spinner"
+                android:entries="@array/arlocation" />
 
-        <Button
-            android:id="@+id/btnAddItem"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="22dp"
-            android:background="@drawable/rounded_button"
-            android:text="Save Court"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            <Spinner
+                android:id="@+id/spType"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/rounded_spinner"
+                android:entries="@array/arType" />
 
+            <Button
+                android:id="@+id/btnAddItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="22dp"
+                android:background="@drawable/rounded_button"
+                android:text="Save Court"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

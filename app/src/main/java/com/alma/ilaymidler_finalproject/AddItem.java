@@ -6,12 +6,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alma.ilaymidler_finalproject.Model.Court;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
 
-public class AddItem extends AppCompatActivity {
+public class AddItem extends BaseMenuActivity {
 
     private EditText etItemName, etItemInfo;
     private Spinner spLocation, spType;
@@ -21,6 +19,8 @@ public class AddItem extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
+
+        setupToolbar(R.id.topToolbar, "Add Court");
 
         etItemName = findViewById(R.id.etItemName);
         etItemInfo = findViewById(R.id.etItemInfo);
@@ -41,6 +41,16 @@ public class AddItem extends AppCompatActivity {
 
             if (info.isEmpty()) {
                 etItemInfo.setError("Please enter court info");
+                return;
+            }
+
+            if (location.equals("Choose city")) {
+                Toast.makeText(this, "Please choose a city", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (type.equals("Choose type")) {
+                Toast.makeText(this, "Please choose a court type", Toast.LENGTH_SHORT).show();
                 return;
             }
 

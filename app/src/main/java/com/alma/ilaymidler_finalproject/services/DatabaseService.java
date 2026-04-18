@@ -1,7 +1,5 @@
 package com.alma.ilaymidler_finalproject.services;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -29,7 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DatabaseService {
 
-    private static final String TAG = "DatabaseService";
     private static final String USERS_PATH = "users";
     private static final String COURT_PATH = "courts";
     private static final String RESERVATIONS_PATH = "reservations";
@@ -138,7 +135,9 @@ public class DatabaseService {
 
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                        ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                        : "";
                 if (callback != null) callback.onCompleted(uid);
             } else {
                 if (callback != null) callback.onFailed(task.getException());
@@ -162,20 +161,37 @@ public class DatabaseService {
         getDataList(USERS_PATH, User.class, callback);
     }
 
-    public void setUserAdmin(@NonNull String userId, boolean isAdmin, @Nullable DatabaseCallback<Void> callback) {
-        readData(USERS_PATH + "/" + userId + "/admin").setValue(isAdmin, (error, ref) -> {
+    public void updateCourt(@NonNull Court court, @Nullable DatabaseCallback<Void> callback) {
+        writeData(COURT_PATH + "/" + court.getId(), court, callback);
+    }
+
+    public void deleteCourt(@NonNull String courtId, @Nullable DatabaseCallback<Void> callback) {
+        readData(COURT_PATH + "/" + courtId).removeValue((error, ref) -> {
             if (error != null) {
                 if (callback != null) callback.onFailed(error.toException());
             } else {
                 if (callback != null) callback.onCompleted(null);
             }
         });
+    }
 
-        readData(USERS_PATH + "/" + userId + "/isAdmin").setValue(isAdmin);
+    public void setUserAdmin(@NonNull String userId, boolean isAdmin, @Nullable DatabaseCallback<Void> callback) {
+        readData(USERS_PATH + "/" + userId + "/isAdmin").setValue(isAdmin, (error, ref) -> {
+            if (error != null) {
+                if (callback != null) callback.onFailed(error.toException());
+            } else {
+                if (callback != null) callback.onCompleted(null);
+            }
+        });
     }
 
     public static String getTodayDate() {
         return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+    }
+
+    public static String getDatePlusDays(int days) {
+        long time = System.currentTimeMillis() + (long) days * 24 * 60 * 60 * 1000;
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
     }
 
     public void getReservationsForCourtOnDate(@NonNull String courtId, @NonNull String date,
@@ -197,7 +213,56 @@ public class DatabaseService {
         });
     }
 
+    public void getReservationsForUser(@NonNull String userId,
+                                       @NonNull DatabaseCallback<List<Reservation>> callback) {
+
+        readData(RESERVATIONS_PATH).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                callback.onFailed(task.getException());
+                return;
+            }
+
+            List<Reservation> reservationList = new ArrayList<>();
+
+            for (DataSnapshot dateSnap : task.getResult().getChildren()) {
+                for (DataSnapshot courtSnap : dateSnap.getChildren()) {
+                    for (DataSnapshot slotSnap : courtSnap.getChildren()) {
+                        Reservation reservation = slotSnap.getValue(Reservation.class);
+                        if (reservation != null && userId.equals(reservation.getUserId())) {
+                            reservationList.add(reservation);
+                        }
+                    }
+                }
+            }
+
+            callback.onCompleted(reservationList);
+        });
+    }
+
+    public void cancelReservation(@NonNull Reservation reservation,
+                                  @NonNull DatabaseCallback<Void> callback) {
+
+        String path = RESERVATIONS_PATH + "/"
+                + reservation.getBookingDate() + "/"
+                + reservation.getCourtId() + "/"
+                + reservation.getSlotId();
+
+        readData(path).removeValue((error, ref) -> {
+            if (error != null) {
+                callback.onFailed(error.toException());
+            } else {
+                callback.onCompleted(null);
+            }
+        });
+    }
+
+    private boolean isOverlapping(String start1, String end1, String start2, String end2) {
+        if (start1 == null || end1 == null || start2 == null || end2 == null) return false;
+        return start1.compareTo(end2) < 0 && start2.compareTo(end1) < 0;
+    }
+
     public void reserveCourtSlot(@NonNull Court court,
+                                 @NonNull String bookingDate,
                                  @NonNull String userId,
                                  @NonNull String userName,
                                  @NonNull String slotId,
@@ -205,22 +270,37 @@ public class DatabaseService {
                                  @NonNull String endTime,
                                  @NonNull DatabaseCallback<String> callback) {
 
-        String today = getTodayDate();
-        DatabaseReference dayCourtRef = readData(RESERVATIONS_PATH + "/" + today + "/" + court.getId());
+        DatabaseReference dayRef = readData(RESERVATIONS_PATH + "/" + bookingDate);
         AtomicReference<String> failReason = new AtomicReference<>("");
 
-        dayCourtRef.runTransaction(new Transaction.Handler() {
+        dayRef.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+
                 int userReservationCount = 0;
 
-                for (MutableData child : currentData.getChildren()) {
-                    Object value = child.getValue();
-                    if (value instanceof Map) {
-                        Object savedUserId = ((Map<?, ?>) value).get("userId");
+                for (MutableData courtNode : currentData.getChildren()) {
+                    for (MutableData slotNode : courtNode.getChildren()) {
+
+                        Object value = slotNode.getValue();
+                        if (!(value instanceof Map)) continue;
+
+                        Map<?, ?> map = (Map<?, ?>) value;
+
+                        String savedUserId = map.get("userId") != null ? map.get("userId").toString() : null;
+                        String savedStart = map.get("startTime") != null ? map.get("startTime").toString() : null;
+                        String savedEnd = map.get("endTime") != null ? map.get("endTime").toString() : null;
+
+                        if (savedUserId == null) continue;
+
                         if (userId.equals(savedUserId)) {
                             userReservationCount++;
+
+                            if (isOverlapping(savedStart, savedEnd, startTime, endTime)) {
+                                failReason.set("You already have a reservation at this time.");
+                                return Transaction.abort();
+                            }
                         }
                     }
                 }
@@ -230,13 +310,15 @@ public class DatabaseService {
                     return Transaction.abort();
                 }
 
-                MutableData slotNode = currentData.child(slotId);
+                MutableData courtNode = currentData.child(court.getId());
+                MutableData slotNode = courtNode.child(slotId);
+
                 if (slotNode.getValue() != null) {
                     failReason.set("This slot is already reserved.");
                     return Transaction.abort();
                 }
 
-                String reservationId = dayCourtRef.push().getKey();
+                String reservationId = readData(RESERVATIONS_PATH).push().getKey();
 
                 Map<String, Object> reservationMap = new HashMap<>();
                 reservationMap.put("id", reservationId);
@@ -246,10 +328,11 @@ public class DatabaseService {
                 reservationMap.put("slotId", slotId);
                 reservationMap.put("startTime", startTime);
                 reservationMap.put("endTime", endTime);
-                reservationMap.put("bookingDate", today);
+                reservationMap.put("bookingDate", bookingDate);
                 reservationMap.put("createdAt", System.currentTimeMillis());
 
                 slotNode.setValue(reservationMap);
+
                 return Transaction.success(currentData);
             }
 
@@ -270,7 +353,7 @@ public class DatabaseService {
                     return;
                 }
 
-                callback.onCompleted("Reservation completed successfully.");
+                callback.onCompleted("Reservation successful!");
             }
         });
     }
