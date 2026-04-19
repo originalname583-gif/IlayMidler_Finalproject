@@ -294,6 +294,7 @@ public class CourtDetailsActivity extends BaseMenuActivity {
                     @Override
                     public void onCompleted(String object) {
                         Toast.makeText(CourtDetailsActivity.this, object, Toast.LENGTH_SHORT).show();
+
                         NotificationHelper.showReservationNotification(
                                 CourtDetailsActivity.this,
                                 court.getName(),
@@ -301,6 +302,15 @@ public class CourtDetailsActivity extends BaseMenuActivity {
                                 slot.getStartTime(),
                                 slot.getEndTime()
                         );
+
+                        NotificationHelper.scheduleReservationReminder(
+                                CourtDetailsActivity.this,
+                                court.getName(),
+                                selectedDate,
+                                slot.getStartTime(),
+                                slot.getEndTime()
+                        );
+
                         loadReservationsForSelectedDate();
                     }
 

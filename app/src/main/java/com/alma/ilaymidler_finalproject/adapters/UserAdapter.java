@@ -42,10 +42,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         User user = userList.get(position);
         if (user == null) return;
 
-        String firstName = user.getFirstName() != null ? user.getFirstName() : "";
-        String lastName = user.getLastName() != null ? user.getLastName() : "";
-        String email = user.getEmail() != null ? user.getEmail() : "";
-        String phone = user.getPhone() != null ? user.getPhone() : "";
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String email = user.getEmail();
+        String phone = user.getPhone();
 
         holder.tvName.setText((firstName + " " + lastName).trim());
         holder.tvEmail.setText(email);

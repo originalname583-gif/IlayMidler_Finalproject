@@ -59,7 +59,7 @@ public class ProfileActivity extends BaseMenuActivity {
 
                 if (user == null) {
                     tvEmpty.setVisibility(View.VISIBLE);
-                    tvEmpty.setText("Failed to load profile");
+                    tvEmpty.setText("Something went wrong while loading your profile.");
                     return;
                 }
 
@@ -74,7 +74,7 @@ public class ProfileActivity extends BaseMenuActivity {
             public void onFailed(Exception e) {
                 progressBar.setVisibility(View.GONE);
                 tvEmpty.setVisibility(View.VISIBLE);
-                tvEmpty.setText("Failed to load profile");
+                tvEmpty.setText("Something went wrong while loading your profile.");
                 Toast.makeText(ProfileActivity.this, "Failed to load profile", Toast.LENGTH_SHORT).show();
             }
         });

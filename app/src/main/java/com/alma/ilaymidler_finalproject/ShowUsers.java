@@ -2,7 +2,7 @@ package com.alma.ilaymidler_finalproject;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,10 +17,9 @@ import java.util.List;
 
 public class ShowUsers extends BaseMenuActivity {
 
-    private static final String TAG = "ShowUsers";
-
     private UserAdapter userAdapter;
-    private TextView tvUserCount;
+    private TextView tvUserCount, tvEmpty;
+    private RecyclerView rvUsers;
     private DatabaseService databaseService;
 
     @Override
@@ -32,8 +31,9 @@ public class ShowUsers extends BaseMenuActivity {
 
         databaseService = DatabaseService.getInstance();
 
-        RecyclerView rvUsers = findViewById(R.id.rv_users);
+        rvUsers = findViewById(R.id.rv_users);
         tvUserCount = findViewById(R.id.tv_user_count);
+        tvEmpty = findViewById(R.id.tvEmpty);
 
         rvUsers.setLayoutManager(new LinearLayoutManager(this));
 
@@ -64,13 +64,26 @@ public class ShowUsers extends BaseMenuActivity {
         databaseService.getUserList(new DatabaseService.DatabaseCallback<List<User>>() {
             @Override
             public void onCompleted(List<User> users) {
+
+                if (users == null || users.isEmpty()) {
+                    tvUserCount.setText("Total users: 0");
+                    rvUsers.setVisibility(View.GONE);
+                    tvEmpty.setVisibility(View.VISIBLE);
+                    tvEmpty.setText("No users were found.");
+                    return;
+                }
+
                 userAdapter.setUserList(users);
                 tvUserCount.setText("Total users: " + users.size());
+                rvUsers.setVisibility(View.VISIBLE);
+                tvEmpty.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "Failed loading users", e);
+                rvUsers.setVisibility(View.GONE);
+                tvEmpty.setVisibility(View.VISIBLE);
+                tvEmpty.setText("Something went wrong while loading users.");
             }
         });
     }

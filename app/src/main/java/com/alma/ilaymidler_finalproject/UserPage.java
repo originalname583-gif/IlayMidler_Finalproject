@@ -2,16 +2,8 @@ package com.alma.ilaymidler_finalproject;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,12 +14,10 @@ import com.alma.ilaymidler_finalproject.services.DatabaseService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class UserPage extends BaseMenuActivity {
 
     private Spinner spinnerCity;
-    private EditText etSearchCourt;
     private RecyclerView rvCourts;
     private TextView tvEmpty;
     private ProgressBar progressBar;
@@ -41,10 +31,9 @@ public class UserPage extends BaseMenuActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_page);
 
-        setupToolbar(R.id.topToolbar, "Find a Court");
+        setupToolbar(R.id.topToolbar, "User Page");
 
         spinnerCity = findViewById(R.id.spinnerCity);
-        etSearchCourt = findViewById(R.id.etSearchCourt);
         rvCourts = findViewById(R.id.rvCourts);
         tvEmpty = findViewById(R.id.tvEmpty);
         progressBar = findViewById(R.id.progressBar);
@@ -60,13 +49,6 @@ public class UserPage extends BaseMenuActivity {
         rvCourts.setAdapter(courtAdapter);
 
         setupSpinner();
-        setupSearch();
-        loadCourts();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         loadCourts();
     }
 
@@ -82,7 +64,8 @@ public class UserPage extends BaseMenuActivity {
         spinnerCity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                applyFilters();
+                String selectedCity = parent.getItemAtPosition(position).toString();
+                filterCourtsByCity(selectedCity);
             }
 
             @Override
@@ -90,23 +73,6 @@ public class UserPage extends BaseMenuActivity {
                 rvCourts.setVisibility(View.GONE);
                 tvEmpty.setVisibility(View.VISIBLE);
                 tvEmpty.setText("Choose a city to view courts");
-            }
-        });
-    }
-
-    private void setupSearch() {
-        etSearchCourt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applyFilters();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
             }
         });
     }
@@ -128,53 +94,28 @@ public class UserPage extends BaseMenuActivity {
 
                 if (allCourts.isEmpty()) {
                     tvEmpty.setVisibility(View.VISIBLE);
-                    tvEmpty.setText("No courts found");
-                    rvCourts.setVisibility(View.GONE);
+                    tvEmpty.setText("No courts were added yet.");
                     return;
                 }
 
-                applyFilters();
+                filterCourtsByCity(spinnerCity.getSelectedItem().toString());
             }
 
             @Override
             public void onFailed(Exception e) {
                 progressBar.setVisibility(View.GONE);
-                rvCourts.setVisibility(View.GONE);
                 tvEmpty.setVisibility(View.VISIBLE);
-                tvEmpty.setText("Failed to load courts");
-                Toast.makeText(UserPage.this, "Failed to load courts", Toast.LENGTH_SHORT).show();
+                tvEmpty.setText("Something went wrong while loading courts.");
             }
         });
     }
 
-    private void applyFilters() {
-        String selectedCity = spinnerCity.getSelectedItem() != null
-                ? spinnerCity.getSelectedItem().toString().trim()
-                : "";
-
-        String searchText = etSearchCourt.getText() != null
-                ? etSearchCourt.getText().toString().trim().toLowerCase(Locale.getDefault())
-                : "";
-
-        if (selectedCity.isEmpty() || selectedCity.equals("Choose city")) {
-            courtAdapter.updateList(new ArrayList<>());
-            rvCourts.setVisibility(View.GONE);
-            tvEmpty.setVisibility(View.VISIBLE);
-            tvEmpty.setText("Choose a city to view courts");
-            return;
-        }
-
+    private void filterCourtsByCity(String city) {
         List<Court> filtered = new ArrayList<>();
 
         for (Court court : allCourts) {
-            String courtCity = court.getCity() != null ? court.getCity().trim() : "";
-            String courtName = court.getName() != null ? court.getName().trim() : "";
-
-            boolean cityMatches = courtCity.equalsIgnoreCase(selectedCity);
-            boolean nameMatches = searchText.isEmpty()
-                    || courtName.toLowerCase(Locale.getDefault()).contains(searchText);
-
-            if (cityMatches && nameMatches) {
+            if (court.getCity() != null &&
+                    court.getCity().trim().equalsIgnoreCase(city.trim())) {
                 filtered.add(court);
             }
         }
@@ -184,12 +125,7 @@ public class UserPage extends BaseMenuActivity {
         if (filtered.isEmpty()) {
             rvCourts.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
-
-            if (searchText.isEmpty()) {
-                tvEmpty.setText("No courts available in this area");
-            } else {
-                tvEmpty.setText("No courts match your search");
-            }
+            tvEmpty.setText("No courts are available in this city.");
         } else {
             rvCourts.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
