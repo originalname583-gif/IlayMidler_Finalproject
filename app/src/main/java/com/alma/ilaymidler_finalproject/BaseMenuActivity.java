@@ -25,27 +25,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
         }
 
-        isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
 
-        if (isLoggedIn) {
-            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseService.getInstance().getUser(uid, new DatabaseService.DatabaseCallback<User>() {
-                @Override
-                public void onCompleted(User user) {
-                    isAdminUser = user != null && user.isAdmin();
-                    invalidateOptionsMenu();
-                }
-
-                @Override
-                public void onFailed(Exception e) {
-                    isAdminUser = false;
-                    invalidateOptionsMenu();
-                }
-            });
-        } else {
-            isAdminUser = false;
-            invalidateOptionsMenu();
-        }
     }
 
     @Override
@@ -66,19 +46,41 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         MenuItem itemShowUsers = menu.findItem(R.id.menu_show_users);
         MenuItem itemLogout = menu.findItem(R.id.menu_logout);
         MenuItem itemManageCourts = menu.findItem(R.id.menu_manage_courts);
+        isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
 
-        if (itemLogin != null) itemLogin.setVisible(!isLoggedIn);
-        if (itemRegister != null) itemRegister.setVisible(!isLoggedIn);
-        if (itemManageCourts != null) itemManageCourts.setVisible(isLoggedIn && isAdminUser);
+        if (isLoggedIn) {
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseService.getInstance().getUser(uid, new DatabaseService.DatabaseCallback<User>() {
+                @Override
+                public void onCompleted(User user) {
+                    isAdminUser = user != null && user.isAdmin();
+                    invalidateOptionsMenu();
+                    if (itemLogin != null) itemLogin.setVisible(!isLoggedIn);
+                    if (itemRegister != null) itemRegister.setVisible(!isLoggedIn);
+                    if (itemManageCourts != null) itemManageCourts.setVisible(isLoggedIn && isAdminUser);
 
-        if (itemUserHome != null) itemUserHome.setVisible(isLoggedIn);
-        if (itemMyReservations != null) itemMyReservations.setVisible(isLoggedIn);
-        if (itemProfile != null) itemProfile.setVisible(isLoggedIn);
-        if (itemLogout != null) itemLogout.setVisible(isLoggedIn);
+                    if (itemUserHome != null) itemUserHome.setVisible(isLoggedIn);
+                    if (itemMyReservations != null) itemMyReservations.setVisible(isLoggedIn);
+                    if (itemProfile != null) itemProfile.setVisible(isLoggedIn);
+                    if (itemLogout != null) itemLogout.setVisible(isLoggedIn);
 
-        if (itemAdminHome != null) itemAdminHome.setVisible(isLoggedIn && isAdminUser);
-        if (itemAddCourt != null) itemAddCourt.setVisible(isLoggedIn && isAdminUser);
-        if (itemShowUsers != null) itemShowUsers.setVisible(isLoggedIn && isAdminUser);
+                    if (itemAdminHome != null) itemAdminHome.setVisible(isLoggedIn && isAdminUser);
+                    if (itemAddCourt != null) itemAddCourt.setVisible(isLoggedIn && isAdminUser);
+                    if (itemShowUsers != null) itemShowUsers.setVisible(isLoggedIn && isAdminUser);
+                }
+
+                @Override
+                public void onFailed(Exception e) {
+                    isAdminUser = false;
+                    invalidateOptionsMenu();
+                }
+            });
+        } else {
+            isAdminUser = false;
+            invalidateOptionsMenu();
+        }
+
+
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -104,7 +106,7 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             startActivity(new Intent(this, About.class));
             return true;
         }
-        if (id == R.id.menu_manage_courts && isAdminUser) {
+        if (id == R.id.menu_manage_courts ) {
             startActivity(new Intent(this, ManageCourtsActivity.class));
             return true;
         }
@@ -124,17 +126,17 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
             return true;
         }
 
-        if (id == R.id.menu_admin_home && isAdminUser) {
+        if (id == R.id.menu_admin_home ) {
             startActivity(new Intent(this, AdminPage.class));
             return true;
         }
 
-        if (id == R.id.menu_add_court && isAdminUser) {
+        if (id == R.id.menu_add_court ) {
             startActivity(new Intent(this, AddItem.class));
             return true;
         }
 
-        if (id == R.id.menu_show_users && isAdminUser) {
+        if (id == R.id.menu_show_users) {
             startActivity(new Intent(this, ShowUsers.class));
             return true;
         }
