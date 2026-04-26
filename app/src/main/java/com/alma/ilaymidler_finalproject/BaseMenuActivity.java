@@ -127,6 +127,8 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         }
 
         if (id == R.id.menu_admin_home ) {
+
+
             startActivity(new Intent(this, AdminPage.class));
             return true;
         }

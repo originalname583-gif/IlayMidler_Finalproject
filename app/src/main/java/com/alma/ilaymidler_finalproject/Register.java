@@ -79,26 +79,23 @@ public class Register extends BaseMenuActivity implements View.OnClickListener {
     }
 
     private void registerUser(String fname, String lname, String phone, String email, String password) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(authTask -> {
-                    if (!authTask.isSuccessful() || mAuth.getCurrentUser() == null) {
-                        Toast.makeText(Register.this, "Email already exists or invalid!", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "FirebaseAuth Error: ", authTask.getException());
-                        return;
-                    }
 
-                    String uid = mAuth.getCurrentUser().getUid();
-                    User user = new User(uid, fname, lname, email, phone, password, false);
+
+            User user = new User("nhh", fname, lname, email, phone, password, false);
                     createUserInDatabase(user);
-                });
+
     }
 
     private void createUserInDatabase(User user) {
-        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<String>() {
             @Override
-            public void onCompleted(Void object) {
+            public void onCompleted(String uid) {
+                user.setId(uid);
+
                 SharedPreferences.Editor editor = sharedpreferences.edit();
                 editor.putString("email", user.getEmail());
+
+                editor.putString("password", user.getPassword());
                 editor.apply();
 
                 startActivity(new Intent(Register.this, UserPage.class));

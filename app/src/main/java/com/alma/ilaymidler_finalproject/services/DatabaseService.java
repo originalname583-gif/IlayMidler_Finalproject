@@ -1,5 +1,7 @@
 package com.alma.ilaymidler_finalproject.services;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -103,11 +105,86 @@ public class DatabaseService {
         return generateNewId(COURT_PATH);
     }
 
-    public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        writeData(USERS_PATH + "/" + user.getId(), user, callback);
+    /// create a new user in the database
+    ///
+    /// @param user     the user object to create (without the id, null)
+    /// @param callback the callback to call when the operation is completed
+    ///                              the callback will receive new user id
+    ///                            if the operation fails, the callback will receive an exception
+    /// @see DatabaseCallback
+    /// @see User
+    public void createNewUser(@NotNull final User user,
+                              @Nullable final DatabaseCallback<String> callback) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("TAG", "createUserWithEmail:success");
+                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        user.setId(uid);
+                        writeData(USERS_PATH + "/" + uid, user, new DatabaseCallback<Void>() {
+                            @Override
+                            public void onCompleted(Void v) {
+                                if (callback != null) callback.onCompleted(uid);
+                            }
+
+                            @Override
+                            public void onFailed(Exception e) {
+                                if (callback != null) callback.onFailed(e);
+                            }
+                        });
+                    } else {
+                        Log.w("TAG", "createUserWithEmail:failure", task.getException());
+                        if (callback != null)
+                            callback.onFailed(task.getException());
+                    }
+                });
     }
 
-    public void getUser(@NotNull String uid, @NotNull DatabaseCallback<User> callback) {
+
+    /// Login with email and password
+    ///
+    /// @param email    , password
+    /// @param callback the callback to call when the operation is completed
+    ///                              the callback will receive String (user id)
+    ///                            if the operation fails, the callback will receive an exception
+    /// @see DatabaseCallback
+    /// @see FirebaseAuth
+
+    public void LoginUser(@NotNull final String email, final String password,
+                          @Nullable final DatabaseCallback<String> callback) {
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+
+                .addOnCompleteListener(task -> {
+
+                    if (task.isSuccessful()) {
+                        Log.d("TAG", "createUserWithEmail:success");
+
+                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        callback.onCompleted(uid);
+
+                    } else {
+                        Log.w("TAG", "createUserWithEmail:failure", task.getException());
+
+                        if (callback != null)
+                            callback.onFailed(task.getException());
+                    }
+                });
+    }
+
+
+    /// get a user from the database
+    ///
+    /// @param uid      the id of the user to get
+    /// @param callback the callback to call when the operation is completed
+    ///                               the callback will receive the user object
+    ///                             if the operation fails, the callback will receive an exception
+    /// @see DatabaseCallback
+    /// @see User
+    public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
         getData(USERS_PATH + "/" + uid, User.class, callback);
     }
 
@@ -123,22 +200,6 @@ public class DatabaseService {
         readData(USERS_PATH + "/" + uid).removeValue().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (callback != null) callback.onCompleted(null);
-            } else {
-                if (callback != null) callback.onFailed(task.getException());
-            }
-        });
-    }
-
-    public static void LoginUser(@NotNull final String email, final String password,
-                                 @Nullable final DatabaseCallback<String> callback) {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                String uid = FirebaseAuth.getInstance().getCurrentUser() != null
-                        ? FirebaseAuth.getInstance().getCurrentUser().getUid()
-                        : "";
-                if (callback != null) callback.onCompleted(uid);
             } else {
                 if (callback != null) callback.onFailed(task.getException());
             }

@@ -63,7 +63,7 @@ public class ProfileActivity extends BaseMenuActivity {
                     return;
                 }
 
-                String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
+                String fullName = (user.getFname() + " " + user.getLname()).trim();
                 tvFullName.setText(fullName.isEmpty() ? "No name" : fullName);
                 tvEmail.setText(user.getEmail().isEmpty() ? "No email" : user.getEmail());
                 tvPhone.setText(user.getPhone().isEmpty() ? "No phone" : user.getPhone());

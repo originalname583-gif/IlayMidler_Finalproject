@@ -13,10 +13,10 @@ public class User {
     public User() {
     }
 
-    public User(String id, String firstName, String lastName, String email, String phone, String password, boolean isAdmin) {
+    public User(String id, String fname, String lname, String email, String phone, String password, boolean isAdmin) {
         this.id = id;
-        this.fname = firstName;
-        this.lname = lastName;
+        this.fname = fname;
+        this.lname = lname;
         this.email = email;
         this.phone = phone;
         this.password = password;
@@ -24,31 +24,31 @@ public class User {
     }
 
     public String getId() {
-        return id != null ? id : "";
+        return id;
     }
 
     public void setId(String id) {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return fname != null ? fname : "";
+    public String getFname() {
+        return fname;
     }
 
-    public void setFirstName(String firstName) {
-        this.fname = firstName;
+    public void setFname(String fname) {
+        this.fname = fname;
     }
 
-    public String getLastName() {
-        return lname != null ? lname : "";
+    public String getLname() {
+        return lname;
     }
 
-    public void setLastName(String lastName) {
-        this.lname = lastName;
+    public void setLname(String lname) {
+        this.lname = lname;
     }
 
     public String getEmail() {
-        return email != null ? email : "";
+        return email;
     }
 
     public void setEmail(String email) {
@@ -56,8 +56,7 @@ public class User {
     }
 
     public String getPhone() {
-        if (phone == null) return "";
-        return phone.replace("\"", "").trim();
+        return phone;
     }
 
     public void setPhone(String phone) {
@@ -65,7 +64,7 @@ public class User {
     }
 
     public String getPassword() {
-        return password != null ? password : "";
+        return password;
     }
 
     public void setPassword(String password) {

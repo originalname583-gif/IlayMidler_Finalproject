@@ -92,7 +92,7 @@ public class ShowUsers extends BaseMenuActivity {
         String action = user.isAdmin() ? "Remove admin access" : "Make admin";
 
         new AlertDialog.Builder(this)
-                .setTitle(user.getFirstName() + " " + user.getLastName())
+                .setTitle(user.getFname() + " " + user.getLname())
                 .setMessage(action + "?")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     databaseService.setUserAdmin(user.getId(), !user.isAdmin(),

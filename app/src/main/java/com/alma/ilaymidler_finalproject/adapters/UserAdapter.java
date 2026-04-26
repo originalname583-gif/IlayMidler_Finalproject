@@ -42,8 +42,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         User user = userList.get(position);
         if (user == null) return;
 
-        String firstName = user.getFirstName();
-        String lastName = user.getLastName();
+        String firstName = user.getFname();
+        String lastName = user.getLname();
         String email = user.getEmail();
         String phone = user.getPhone();
 
