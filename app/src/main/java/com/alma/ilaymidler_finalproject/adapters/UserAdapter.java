@@ -18,33 +18,30 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public interface OnUserClickListener {
-
         void onUserClick(User user);
-        // הפעולה שתופעל כאשר המשתמש לוחץ על משתמש.
+        // פעולה בלחיצה רגילה על משתמש.
 
         void onLongUserClick(User user);
-        // הפעולה שתופעל כאשר המשתמש לוחץ לחיצה ארוכה על משתמש.
+        // פעולה בלחיצה ארוכה על משתמש.
     }
 
     private final List<User> userList = new ArrayList<>();
-    // רשימת המשתמשים שתוצג ב-RecyclerView.
+    // רשימת המשתמשים שמוצגת במסך.
 
     private final OnUserClickListener listener;
-    // שומר את הפעולות שיקרו בלחיצה רגילה או ארוכה.
+    // שומר את פעולות הלחיצה.
 
     public UserAdapter(@Nullable OnUserClickListener listener) {
-
         this.listener = listener;
-        // שומר את ה-listener שהתקבל.
+        // שומר את ה-listener.
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.row_user, parent, false);
-        // יוצר שורה חדשה לפי העיצוב row_user.xml.
+        // יוצר שורה לפי row_user.xml.
 
         return new ViewHolder(view);
         // מחזיר ViewHolder חדש.
@@ -52,132 +49,121 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
         User user = userList.get(position);
-        // לוקח את המשתמש המתאים לפי המיקום ברשימה.
+        // לוקח משתמש לפי המיקום ברשימה.
 
         if (user == null) {
             return;
-            // הגנה מפני מצב שבו המשתמש ריק.
+            // אם המשתמש ריק, עוצרים.
         }
 
-        String firstName = getSafeText(user.getFirstName());
-        // לוקח את השם הפרטי בצורה בטוחה.
+        String fullName = user.getFullName();
+        // מקבל שם מלא בצורה בטוחה מה-User model.
 
-        String lastName = getSafeText(user.getLastName());
-        // לוקח את שם המשפחה בצורה בטוחה.
+        String email = user.getEmail();
+        // מקבל אימייל.
 
-        String email = getSafeText(user.getEmail());
-        // לוקח את האימייל בצורה בטוחה.
+        String phone = user.getPhone();
+        // מקבל טלפון.
 
-        String phone = getSafeText(user.getPhone());
-        // לוקח את הטלפון בצורה בטוחה.
+        holder.tvName.setText(fullName.isEmpty() ? "No name" : fullName);
+        // מציג שם, ואם אין שם מציג No name.
 
-        holder.tvName.setText((firstName + " " + lastName).trim());
-        // מציג את השם המלא.
+        holder.tvEmail.setText(email.isEmpty() ? "No email" : email);
+        // מציג אימייל.
 
-        holder.tvEmail.setText(email);
-        // מציג את האימייל.
+        holder.tvPhone.setText(phone.isEmpty() ? "No phone" : phone);
+        // מציג טלפון.
 
-        holder.tvPhone.setText(phone);
-        // מציג את הטלפון.
-
-        String initials = "";
-        // ישמור את ראשי התיבות.
-
-        if (!firstName.isEmpty()) {
-            initials += firstName.charAt(0);
-            // מוסיף את האות הראשונה של השם הפרטי.
-        }
-
-        if (!lastName.isEmpty()) {
-            initials += lastName.charAt(0);
-            // מוסיף את האות הראשונה של שם המשפחה.
-        }
-
-        holder.tvInitials.setText(initials.toUpperCase());
-        // מציג את ראשי התיבות באותיות גדולות.
+        holder.tvInitials.setText(createInitials(user));
+        // מציג ראשי תיבות בעיגול הכחול.
 
         holder.itemView.setOnClickListener(v -> {
-
             if (listener != null) {
                 listener.onUserClick(user);
-                // מפעיל לחיצה רגילה על המשתמש.
+                // מפעיל לחיצה רגילה.
             }
         });
 
         holder.itemView.setOnLongClickListener(v -> {
-
             if (listener != null) {
                 listener.onLongUserClick(user);
-                // מפעיל לחיצה ארוכה על המשתמש.
+                // מפעיל לחיצה ארוכה.
             }
 
             return true;
-            // מסמן שהלחיצה הארוכה טופלה.
+            // אומר שהלחיצה הארוכה טופלה.
         });
     }
 
     @Override
     public int getItemCount() {
-
         return userList.size();
-        // מחזיר כמה משתמשים קיימים ברשימה.
+        // מחזיר כמה משתמשים יש ברשימה.
     }
 
     public void setUserList(List<User> users) {
-
         userList.clear();
-        // מנקה את הרשימה הישנה.
+        // מנקה רשימה ישנה.
 
         if (users != null) {
             userList.addAll(users);
-            // מוסיף את כל המשתמשים החדשים.
+            // מוסיף משתמשים חדשים.
         }
 
         notifyDataSetChanged();
-        // מרענן את ה-RecyclerView.
+        // מרענן את הרשימה.
     }
 
-    private String getSafeText(String text) {
+    private String createInitials(User user) {
+        String firstName = user.getFirstName();
+        // שם פרטי.
 
-        if (text == null) {
-            return "";
-            // אם הטקסט לא קיים מחזירים מחרוזת ריקה.
+        String lastName = user.getLastName();
+        // שם משפחה.
+
+        String initials = "";
+        // כאן נשמור ראשי תיבות.
+
+        if (!firstName.isEmpty()) {
+            initials += firstName.charAt(0);
+            // מוסיף אות ראשונה של שם פרטי.
         }
 
-        return text.trim();
-        // מחזיר את הטקסט ללא רווחים מיותרים.
+        if (!lastName.isEmpty()) {
+            initials += lastName.charAt(0);
+            // מוסיף אות ראשונה של שם משפחה.
+        }
+
+        if (initials.isEmpty() && !user.getEmail().isEmpty()) {
+            initials += user.getEmail().charAt(0);
+            // אם אין שם בכלל, משתמשים באות הראשונה של האימייל.
+        }
+
+        return initials.toUpperCase();
+        // מחזיר ראשי תיבות באות גדולה.
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvName;
-        // מציג את השם המלא.
-
-        TextView tvEmail;
-        // מציג את האימייל.
-
-        TextView tvPhone;
-        // מציג את הטלפון.
-
-        TextView tvInitials;
-        // מציג את ראשי התיבות.
+        TextView tvName, tvEmail, tvPhone, tvInitials;
+        // רכיבי הטקסט של שורת משתמש.
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            // מחבר את השורה ל-ViewHolder.
 
             tvName = itemView.findViewById(R.id.tv_user_name);
-            // מחבר את שדה השם.
+            // שם המשתמש.
 
             tvEmail = itemView.findViewById(R.id.tv_user_email);
-            // מחבר את שדה האימייל.
+            // אימייל המשתמש.
 
             tvPhone = itemView.findViewById(R.id.tv_user_phone);
-            // מחבר את שדה הטלפון.
+            // טלפון המשתמש.
 
             tvInitials = itemView.findViewById(R.id.tv_user_initials);
-            // מחבר את שדה ראשי התיבות.
+            // ראשי תיבות בעיגול.
         }
     }
 }

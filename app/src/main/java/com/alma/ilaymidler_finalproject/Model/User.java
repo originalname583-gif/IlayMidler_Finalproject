@@ -3,166 +3,162 @@ package com.alma.ilaymidler_finalproject.Model;
 public class User {
 
     private String id;
-    // מזהה ייחודי של המשתמש ב-Firebase.
+    // מזהה המשתמש ב-Firebase.
 
     private String fname;
-    // השם הפרטי של המשתמש.
+    // שם פרטי כמו שנשמר אצלך במסד.
 
     private String lname;
-    // שם המשפחה של המשתמש.
+    // שם משפחה כמו שנשמר אצלך במסד.
+
+    private String firstName;
+    // תמיכה בשם נוסף למקרה שמשתמשים נשמרו בשם firstName.
+
+    private String lastName;
+    // תמיכה בשם נוסף למקרה שמשתמשים נשמרו בשם lastName.
 
     private String email;
-    // כתובת האימייל של המשתמש.
+    // אימייל המשתמש.
 
     private String phone;
-    // מספר הטלפון של המשתמש.
+    // טלפון המשתמש.
 
     private String password;
-    // סיסמת המשתמש.
+    // סיסמה.
 
     private boolean isAdmin;
-    // קובע האם המשתמש הוא מנהל או משתמש רגיל.
+    // האם המשתמש מנהל.
 
     public User() {
-        // בנאי ריק.
-        // Firebase חייב אותו כדי ליצור אובייקט בעת טעינת נתונים מהמסד.
+        // Firebase צריך בנאי ריק.
     }
 
-    public User(String id,
-                String firstName,
-                String lastName,
-                String email,
-                String phone,
-                String password,
-                boolean isAdmin) {
-
+    public User(String id, String firstName, String lastName, String email, String phone, String password, boolean isAdmin) {
         this.id = id;
-        // שומר את מזהה המשתמש.
-
         this.fname = firstName;
-        // שומר את השם הפרטי.
-
         this.lname = lastName;
-        // שומר את שם המשפחה.
-
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
-        // שומר את האימייל.
-
         this.phone = phone;
-        // שומר את הטלפון.
-
         this.password = password;
-        // שומר את הסיסמה.
-
         this.isAdmin = isAdmin;
-        // שומר האם המשתמש הוא מנהל.
+        // שומר את השם גם כ-fname/lname וגם כ-firstName/lastName כדי שלא יהיו בעיות תאימות.
     }
 
     public String getId() {
-
         return id != null ? id : "";
-        // מחזיר את מזהה המשתמש.
-        // אם הערך null מחזיר מחרוזת ריקה.
+        // מחזיר id בצורה בטוחה.
     }
 
     public void setId(String id) {
-
         this.id = id;
-        // מעדכן את מזהה המשתמש.
+        // מעדכן id.
     }
 
     public String getFirstName() {
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            return firstName.trim();
+        }
 
-        return fname != null ? fname : "";
-        // מחזיר את השם הפרטי.
+        if (fname != null && !fname.trim().isEmpty()) {
+            return fname.trim();
+        }
+
+        return "";
+        // מחזיר שם פרטי גם אם הוא נשמר כ-firstName וגם אם הוא נשמר כ-fname.
     }
 
     public void setFirstName(String firstName) {
-
+        this.firstName = firstName;
         this.fname = firstName;
-        // מעדכן את השם הפרטי.
+        // מעדכן את שני השדות כדי לשמור תאימות.
     }
 
     public String getLastName() {
+        if (lastName != null && !lastName.trim().isEmpty()) {
+            return lastName.trim();
+        }
 
-        return lname != null ? lname : "";
-        // מחזיר את שם המשפחה.
+        if (lname != null && !lname.trim().isEmpty()) {
+            return lname.trim();
+        }
+
+        return "";
+        // מחזיר שם משפחה גם אם הוא נשמר כ-lastName וגם אם הוא נשמר כ-lname.
     }
 
     public void setLastName(String lastName) {
-
+        this.lastName = lastName;
         this.lname = lastName;
-        // מעדכן את שם המשפחה.
+        // מעדכן את שני השדות.
+    }
+
+    public String getFname() {
+        return getFirstName();
+        // מחזיר שם פרטי.
+    }
+
+    public void setFname(String fname) {
+        this.fname = fname;
+        this.firstName = fname;
+        // חשוב ל-Firebase אם השדה נקרא fname.
+    }
+
+    public String getLname() {
+        return getLastName();
+        // מחזיר שם משפחה.
+    }
+
+    public void setLname(String lname) {
+        this.lname = lname;
+        this.lastName = lname;
+        // חשוב ל-Firebase אם השדה נקרא lname.
+    }
+
+    public String getFullName() {
+        return (getFirstName() + " " + getLastName()).trim();
+        // מחזיר שם מלא.
     }
 
     public String getEmail() {
-
         return email != null ? email : "";
-        // מחזיר את האימייל.
+        // מחזיר אימייל.
     }
 
     public void setEmail(String email) {
-
         this.email = email;
-        // מעדכן את האימייל.
+        // מעדכן אימייל.
     }
 
     public String getPhone() {
-
-        if (phone == null) {
-            return "";
-            // אם הטלפון לא קיים מחזירים מחרוזת ריקה.
-        }
-
+        if (phone == null) return "";
         return phone.replace("\"", "").trim();
-        // מנקה גרשיים ורווחים מיותרים מהטלפון ומחזיר אותו.
+        // מחזיר טלפון נקי.
     }
 
     public void setPhone(String phone) {
-
         this.phone = phone;
-        // מעדכן את מספר הטלפון.
+        // מעדכן טלפון.
     }
 
     public String getPassword() {
-
         return password != null ? password : "";
-        // מחזיר את הסיסמה.
+        // מחזיר סיסמה.
     }
 
     public void setPassword(String password) {
-
         this.password = password;
-        // מעדכן את הסיסמה.
+        // מעדכן סיסמה.
     }
 
     public boolean isAdmin() {
-
         return isAdmin;
-        // מחזיר האם המשתמש הוא מנהל.
-        // true = מנהל
-        // false = משתמש רגיל
+        // מחזיר האם המשתמש מנהל.
     }
 
     public void setAdmin(boolean admin) {
-
         isAdmin = admin;
-        // מעדכן את הרשאת המנהל של המשתמש.
-    }
-
-    @Override
-    public String toString() {
-
-        return "User{" +
-                "id='" + id + '\'' +
-                ", fname='" + fname + '\'' +
-                ", lname='" + lname + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", password='" + password + '\'' +
-                ", isAdmin=" + isAdmin +
-                '}';
-        // מחזיר תיאור טקסטואלי של המשתמש.
-        // שימושי ל-Log, Debug ובדיקות.
+        // מעדכן הרשאת מנהל.
     }
 }

@@ -3,7 +3,6 @@ package com.alma.ilaymidler_finalproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -12,36 +11,43 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.alma.ilaymidler_finalproject.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class Login extends AppCompatActivity {
 
     private EditText emailEditText;
-    // שדה האימייל.
+    // תיבת הכנסת אימייל.
 
     private EditText passwordEditText;
-    // שדה הסיסמה.
+    // תיבת הכנסת סיסמה.
 
     private Button loginButton;
     // כפתור התחברות.
 
     private FirebaseAuth mAuth;
-    // אחראי על התחברות Firebase.
+    // אחראי על ההתחברות דרך Firebase Authentication.
+
+    private DatabaseService databaseService;
+    // אחראי על קריאה וכתיבה למסד הנתונים.
 
     private boolean loginInProgress = false;
     // מונע לחיצות מרובות על כפתור Login.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // הפונקציה הראשונה שרצה כשהמסך נפתח.
+
         super.onCreate(savedInstanceState);
-        // מופעל כאשר המסך נפתח.
 
         setContentView(R.layout.activity_login);
-        // טוען את קובץ העיצוב של המסך.
+        // מציג את עיצוב המסך.
 
         mAuth = FirebaseAuth.getInstance();
-        // מקבל גישה ל-Firebase Authentication.
+        // יוצר חיבור ל-Firebase Authentication.
+
+        databaseService = DatabaseService.getInstance();
+        // מקבל גישה לשירות מסד הנתונים.
 
         emailEditText = findViewById(R.id.editTextEmail);
         // מחבר את שדה האימייל מה-XML.
@@ -53,46 +59,40 @@ public class Login extends AppCompatActivity {
         // מחבר את כפתור ההתחברות.
 
         loginButton.setOnClickListener(v -> loginUser());
-        // כאשר המשתמש לוחץ על Login מפעילים התחברות.
+        // כאשר המשתמש לוחץ על Login מפעילים את loginUser().
     }
 
     private void loginUser() {
-        // הפונקציה מבצעת התחברות למערכת.
+        // הפונקציה מבצעת בדיקות לפני התחברות.
 
         if (loginInProgress) {
             return;
-            // אם כבר מתבצעת התחברות, לא מאפשרים עוד לחיצה.
+            // אם כבר מתבצעת התחברות לא נותנים להתחיל עוד אחת.
         }
 
         String email = emailEditText.getText().toString().trim();
-        // לוקח את האימייל שהמשתמש הכניס.
+        // לוקח את האימייל שהמשתמש כתב.
 
         String password = passwordEditText.getText().toString().trim();
-        // לוקח את הסיסמה שהמשתמש הכניס.
+        // לוקח את הסיסמה שהמשתמש כתב.
 
         if (TextUtils.isEmpty(email)) {
-            emailEditText.setError("Enter email");
+            emailEditText.setError("Please enter email");
             return;
-            // אם האימייל ריק מציג שגיאה.
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("Invalid email");
-            return;
-            // אם האימייל לא תקין מציג שגיאה.
+            // אם האימייל ריק עוצרים.
         }
 
         if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("Enter password");
+            passwordEditText.setError("Please enter password");
             return;
-            // אם הסיסמה ריקה מציג שגיאה.
+            // אם הסיסמה ריקה עוצרים.
         }
 
         loginInProgress = true;
-        // מסמנים שהתחילה התחברות.
+        // מסמן שהתחילה התחברות.
 
         loginButton.setEnabled(false);
-        // מבטלים זמנית את הכפתור.
+        // מבטל את הכפתור עד שההתחברות תסתיים.
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -100,99 +100,106 @@ public class Login extends AppCompatActivity {
                     if (!task.isSuccessful()) {
 
                         loginInProgress = false;
-                        // מסמנים שהתחברות הסתיימה.
+                        // מסמן שההתחברות הסתיימה.
 
                         loginButton.setEnabled(true);
-                        // מחזירים את הכפתור לפעולה.
+                        // מחזיר את הכפתור לפעילות.
 
                         Toast.makeText(
                                 Login.this,
-                                task.getException() != null
-                                        ? task.getException().getMessage()
-                                        : "Login failed",
-                                Toast.LENGTH_LONG
+                                "Login failed",
+                                Toast.LENGTH_SHORT
                         ).show();
-                        // מציגים את השגיאה האמיתית של Firebase.
 
                         return;
                     }
 
-                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    // מקבלים את המשתמש שהתחבר.
+                    String uid = mAuth.getCurrentUser() != null
+                            ? mAuth.getCurrentUser().getUid()
+                            : "";
+                    // לוקח את מזהה המשתמש שהתחבר.
 
-                    if (firebaseUser == null) {
-
-                        loginInProgress = false;
-                        loginButton.setEnabled(true);
-
-                        Toast.makeText(Login.this, "Login failed", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    loadUserRole(firebaseUser.getUid());
-                    // בודקים האם המשתמש מנהל או משתמש רגיל.
+                    loadUserData(uid);
+                    // מביא את פרטי המשתמש מהמסד.
                 });
     }
 
-    private void loadUserRole(String uid) {
-        // הפונקציה מביאה את המשתמש מה-Database.
+    private void loadUserData(String uid) {
+        // הפונקציה מביאה את פרטי המשתמש מה-Firebase Database.
 
-        DatabaseService.getInstance().getUser(uid,
-                new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUser(uid, new DatabaseService.DatabaseCallback<User>() {
 
-                    @Override
-                    public void onCompleted(User user) {
+            @Override
+            public void onCompleted(User user) {
 
-                        loginInProgress = false;
-                        // מסמנים שסיימנו התחברות.
+                loginInProgress = false;
+                // מסמן שסיימנו להתחבר.
 
-                        loginButton.setEnabled(true);
-                        // מחזירים את הכפתור לפעולה.
+                loginButton.setEnabled(true);
+                // מחזיר את הכפתור לפעילות.
 
-                        if (user == null) {
-                            Toast.makeText(Login.this,
-                                    "User data not found",
-                                    Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+                if (user == null) {
 
-                        Toast.makeText(Login.this,
-                                "Login successful",
-                                Toast.LENGTH_SHORT).show();
-                        // הודעת הצלחה.
+                    Toast.makeText(
+                            Login.this,
+                            "User data not found",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
-                        Intent intent;
+                    return;
+                }
 
-                        if (user.isAdmin()) {
-                            // אם המשתמש מנהל.
+                SessionManager.saveUser(Login.this, user);
+                // שומר את פרטי המשתמש ב-SharedPreferences.
 
-                            intent = new Intent(Login.this, AdminPage.class);
-                        } else {
-                            // אם המשתמש רגיל.
+                Toast.makeText(
+                        Login.this,
+                        "Login successful",
+                        Toast.LENGTH_SHORT
+                ).show();
 
-                            intent = new Intent(Login.this, UserPage.class);
-                        }
+                Intent intent;
+                // ישמור את המסך שאליו נעבור.
 
-                        startActivity(intent);
-                        // מעבר למסך המתאים.
+                if (user.isAdmin()) {
 
-                        finish();
-                        // סוגר את מסך ההתחברות.
-                    }
+                    intent = new Intent(
+                            Login.this,
+                            AdminPage.class
+                    );
+                    // אם המשתמש מנהל מעבירים לדף מנהל.
 
-                    @Override
-                    public void onFailed(Exception e) {
+                } else {
 
-                        loginInProgress = false;
-                        // מסמנים שסיימנו.
+                    intent = new Intent(
+                            Login.this,
+                            UserPage.class
+                    );
+                    // אם המשתמש רגיל מעבירים לדף משתמש.
+                }
 
-                        loginButton.setEnabled(true);
-                        // מחזירים את הכפתור לפעולה.
+                startActivity(intent);
+                // פותח את המסך המתאים.
 
-                        Toast.makeText(Login.this,
-                                "Failed loading user data",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+                finish();
+                // סוגר את מסך ההתחברות.
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+
+                loginInProgress = false;
+                // מסמן שסיימנו את הניסיון.
+
+                loginButton.setEnabled(true);
+                // מחזיר את הכפתור לפעילות.
+
+                Toast.makeText(
+                        Login.this,
+                        "Failed to load user data",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 }

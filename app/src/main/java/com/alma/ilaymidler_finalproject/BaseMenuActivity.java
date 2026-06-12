@@ -10,307 +10,398 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.alma.ilaymidler_finalproject.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public abstract class BaseMenuActivity extends AppCompatActivity {
 
     protected Toolbar toolbar;
-    // משתנה שמייצג את סרגל הכלים העליון של המסך.
+    // המשתנה שומר את ה-Toolbar של המסך.
 
     protected boolean isAdminUser = false;
-    // שומר האם המשתמש המחובר הוא מנהל.
+    // שומר האם המשתמש הנוכחי הוא מנהל.
 
     protected boolean isLoggedIn = false;
-    // שומר האם יש משתמש מחובר כרגע.
+    // שומר האם יש משתמש מחובר.
 
     private boolean adminLoaded = false;
-    // שומר האם סיימנו לבדוק אם המשתמש מנהל או לא.
+    // שומר האם סיימנו לבדוק אם המשתמש מנהל.
 
     protected void setupToolbar(int toolbarId, String title) {
-        // הפונקציה מגדירה את ה-Toolbar של המסך.
+        // הפונקציה מחברת את ה-Toolbar למסך ומפעילה אותו.
 
         toolbar = findViewById(toolbarId);
-        // מחבר את ה-Toolbar מה-XML לקוד.
+        // מוצא את ה-Toolbar מתוך ה-XML.
 
         if (toolbar != null) {
+
             toolbar.setTitle(title);
-            // שם כותרת בסרגל העליון.
+            // קובע את הכותרת של המסך.
 
             setSupportActionBar(toolbar);
-            // מגדיר את ה-Toolbar כ-ActionBar של המסך.
+            // הופך את ה-Toolbar לתפריט הראשי של המסך.
         }
 
         loadUserRole();
-        // טוען את תפקיד המשתמש כדי לדעת איזה תפריט להציג.
+        // בודק האם המשתמש הוא מנהל.
     }
 
     private void loadUserRole() {
-        // הפונקציה בודקת אם המשתמש מחובר ואם הוא מנהל.
+        // הפונקציה בודקת האם יש משתמש מחובר והאם הוא מנהל.
 
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        // מקבל את המשתמש שמחובר כרגע דרך Firebase Authentication.
+        FirebaseUser firebaseUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+        // לוקח את המשתמש המחובר.
 
         isLoggedIn = firebaseUser != null;
-        // אם המשתמש לא null סימן שיש משתמש מחובר.
+        // בודק האם יש משתמש מחובר.
 
         if (!isLoggedIn) {
+
             isAdminUser = false;
-            // אם אין משתמש מחובר, הוא בטוח לא מנהל.
+            // אם אין משתמש מחובר הוא לא מנהל.
 
             adminLoaded = true;
-            // מסמנים שסיימנו לבדוק הרשאות.
+            // סימון שסיימנו את הבדיקה.
 
             invalidateOptionsMenu();
-            // מרענן את התפריט העליון.
+            // מרענן את התפריט.
 
             return;
-            // עוצר את המשך הפונקציה.
         }
 
-        DatabaseService.getInstance().getUser(firebaseUser.getUid(), new DatabaseService.DatabaseCallback<User>() {
-            // מביא את פרטי המשתמש מה-Database לפי ה-uid שלו.
+        DatabaseService.getInstance().getUser(
+                firebaseUser.getUid(),
+                new DatabaseService.DatabaseCallback<User>() {
 
-            @Override
-            public void onCompleted(User user) {
-                isAdminUser = user != null && user.isAdmin();
-                // אם המשתמש קיים והוא מנהל, שומרים true.
+                    @Override
+                    public void onCompleted(User user) {
 
-                adminLoaded = true;
-                // מסמנים שסיימנו לבדוק האם הוא מנהל.
+                        isAdminUser =
+                                user != null &&
+                                        user.isAdmin();
+                        // בודק האם המשתמש מנהל.
 
-                invalidateOptionsMenu();
-                // מרענן את התפריט כדי להציג/להסתיר אפשרויות.
-            }
+                        adminLoaded = true;
+                        // סימון שסיימנו לבדוק.
 
-            @Override
-            public void onFailed(Exception e) {
-                isAdminUser = false;
-                // אם הייתה שגיאה, לא נותנים הרשאת מנהל.
+                        invalidateOptionsMenu();
+                        // מרענן את התפריט.
+                    }
 
-                adminLoaded = true;
-                // מסמנים שסיימנו לבדוק.
+                    @Override
+                    public void onFailed(Exception e) {
 
-                invalidateOptionsMenu();
-                // מרענן את התפריט.
-            }
-        });
+                        isAdminUser = false;
+                        // במקרה של שגיאה המשתמש לא ייחשב מנהל.
+
+                        adminLoaded = true;
+                        // סימון שסיימנו לבדוק.
+
+                        invalidateOptionsMenu();
+                        // מרענן את התפריט.
+                    }
+                });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // הפונקציה יוצרת את התפריט העליון.
 
-        getMenuInflater().inflate(R.menu.app_top_menu, menu);
-        // טוען את קובץ התפריט app_top_menu.xml.
+        getMenuInflater().inflate(
+                R.menu.app_top_menu,
+                menu
+        );
+        // טוענת את קובץ התפריט.
 
         return true;
-        // מחזיר true כדי שהתפריט יוצג.
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // הפונקציה קובעת אילו כפתורים בתפריט יוצגו ואילו יוסתרו.
+        // הפונקציה מחליטה אילו כפתורים יוצגו בתפריט.
 
-        MenuItem itemLogin = menu.findItem(R.id.menu_login);
-        // מוצא את כפתור Login בתפריט.
+        MenuItem itemLogin =
+                menu.findItem(R.id.menu_login);
 
-        MenuItem itemRegister = menu.findItem(R.id.menu_register);
-        // מוצא את כפתור Register בתפריט.
+        MenuItem itemRegister =
+                menu.findItem(R.id.menu_register);
 
-        MenuItem itemUserHome = menu.findItem(R.id.menu_user_home);
-        // מוצא את כפתור עמוד המשתמש.
+        MenuItem itemUserHome =
+                menu.findItem(R.id.menu_user_home);
 
-        MenuItem itemMyReservations = menu.findItem(R.id.menu_my_reservations);
-        // מוצא את כפתור ההזמנות שלי.
+        MenuItem itemMyReservations =
+                menu.findItem(R.id.menu_my_reservations);
 
-        MenuItem itemProfile = menu.findItem(R.id.menu_profile);
-        // מוצא את כפתור הפרופיל.
+        MenuItem itemProfile =
+                menu.findItem(R.id.menu_profile);
 
-        MenuItem itemAdminHome = menu.findItem(R.id.menu_admin_home);
-        // מוצא את כפתור עמוד המנהל.
+        MenuItem itemAdminHome =
+                menu.findItem(R.id.menu_admin_home);
 
-        MenuItem itemAddCourt = menu.findItem(R.id.menu_add_court);
-        // מוצא את כפתור הוספת מגרש.
+        MenuItem itemAddCourt =
+                menu.findItem(R.id.menu_add_court);
 
-        MenuItem itemShowUsers = menu.findItem(R.id.menu_show_users);
-        // מוצא את כפתור הצגת המשתמשים.
+        MenuItem itemShowUsers =
+                menu.findItem(R.id.menu_show_users);
 
-        MenuItem itemLogout = menu.findItem(R.id.menu_logout);
-        // מוצא את כפתור ההתנתקות.
+        MenuItem itemManageCourts =
+                menu.findItem(R.id.menu_manage_courts);
 
-        MenuItem itemManageCourts = menu.findItem(R.id.menu_manage_courts);
-        // מוצא את כפתור ניהול המגרשים.
+        MenuItem itemLogout =
+                menu.findItem(R.id.menu_logout);
 
-        isLoggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
-        // בודק שוב האם יש משתמש מחובר.
+        isLoggedIn =
+                FirebaseAuth.getInstance()
+                        .getCurrentUser() != null;
+        // בודק האם יש משתמש מחובר.
 
-        if (itemLogin != null) itemLogin.setVisible(!isLoggedIn);
-        // מציג Login רק אם אין משתמש מחובר.
+        if (itemLogin != null)
+            itemLogin.setVisible(!isLoggedIn);
+        // Login מוצג רק אם אין משתמש מחובר.
 
-        if (itemRegister != null) itemRegister.setVisible(!isLoggedIn);
-        // מציג Register רק אם אין משתמש מחובר.
+        if (itemRegister != null)
+            itemRegister.setVisible(!isLoggedIn);
+        // Register מוצג רק אם אין משתמש מחובר.
 
-        if (itemUserHome != null) itemUserHome.setVisible(isLoggedIn);
-        // מציג עמוד משתמש רק אם יש משתמש מחובר.
+        if (itemUserHome != null)
+            itemUserHome.setVisible(isLoggedIn);
+        // דף משתמש מוצג רק למשתמש מחובר.
 
-        if (itemMyReservations != null) itemMyReservations.setVisible(isLoggedIn);
-        // מציג ההזמנות שלי רק אם יש משתמש מחובר.
+        if (itemMyReservations != null)
+            itemMyReservations.setVisible(isLoggedIn);
+        // ההזמנות שלי מוצג רק למשתמש מחובר.
 
-        if (itemProfile != null) itemProfile.setVisible(isLoggedIn);
-        // מציג פרופיל רק אם יש משתמש מחובר.
+        if (itemProfile != null)
+            itemProfile.setVisible(isLoggedIn);
+        // פרופיל מוצג רק למשתמש מחובר.
 
-        if (itemLogout != null) itemLogout.setVisible(isLoggedIn);
-        // מציג Logout רק אם יש משתמש מחובר.
+        if (itemLogout != null)
+            itemLogout.setVisible(isLoggedIn);
+        // Logout מוצג רק למשתמש מחובר.
 
-        boolean canSeeAdmin = isLoggedIn && adminLoaded && isAdminUser;
-        // קובע האם מותר להציג אפשרויות מנהל.
-        // צריך להיות מחובר, טעינת הרשאה הסתיימה, והמשתמש מנהל.
+        boolean canSeeAdmin =
+                isLoggedIn &&
+                        adminLoaded &&
+                        isAdminUser;
+        // רק מנהל מחובר יכול לראות תפריטי מנהל.
 
-        if (itemAdminHome != null) itemAdminHome.setVisible(canSeeAdmin);
-        // מציג עמוד מנהל רק למנהל.
+        if (itemAdminHome != null)
+            itemAdminHome.setVisible(canSeeAdmin);
 
-        if (itemAddCourt != null) itemAddCourt.setVisible(canSeeAdmin);
-        // מציג הוספת מגרש רק למנהל.
+        if (itemAddCourt != null)
+            itemAddCourt.setVisible(canSeeAdmin);
 
-        if (itemShowUsers != null) itemShowUsers.setVisible(canSeeAdmin);
-        // מציג רשימת משתמשים רק למנהל.
+        if (itemShowUsers != null)
+            itemShowUsers.setVisible(canSeeAdmin);
 
-        if (itemManageCourts != null) itemManageCourts.setVisible(canSeeAdmin);
-        // מציג ניהול מגרשים רק למנהל.
+        if (itemManageCourts != null)
+            itemManageCourts.setVisible(canSeeAdmin);
 
         return true;
-        // מחזיר true כדי שהתפריט יתעדכן.
     }
 
     private boolean blockIfNotAdmin() {
-        // הפונקציה חוסמת כניסה לעמודי מנהל אם המשתמש לא מנהל.
+        // הפונקציה חוסמת משתמש רגיל מגישה למסכי מנהל.
 
-        if (!isLoggedIn || !adminLoaded || !isAdminUser) {
-            // אם המשתמש לא מחובר, או שההרשאה עוד לא נטענה, או שהוא לא מנהל.
+        if (!isLoggedIn || !isAdminUser) {
 
-            Toast.makeText(this, "אין לך הרשאה להיכנס לעמוד מנהל", Toast.LENGTH_SHORT).show();
-            // מציג הודעה שאין הרשאה.
+            Toast.makeText(
+                    this,
+                    "אין לך הרשאה להיכנס לעמוד מנהל",
+                    Toast.LENGTH_SHORT
+            ).show();
 
-            startActivity(new Intent(this, UserPage.class));
-            // מעביר את המשתמש לעמוד משתמש רגיל.
+            startActivity(
+                    new Intent(
+                            this,
+                            UserPage.class
+                    )
+            );
+            // מעביר את המשתמש לדף המשתמש.
 
             return true;
-            // מחזיר true כדי להגיד שהכניסה נחסמה.
         }
 
         return false;
-        // מחזיר false אם המשתמש כן מנהל ואפשר לתת לו להיכנס.
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // הפונקציה מופעלת כאשר המשתמש לוחץ על פריט בתפריט.
+        // מופעל כאשר המשתמש לוחץ על כפתור בתפריט.
 
         int id = item.getItemId();
-        // לוקח את ה-id של הפריט שנלחץ.
 
         if (id == R.id.menu_main) {
-            startActivity(new Intent(this, MainActivity.class));
-            // מעבר למסך הראשי.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            MainActivity.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_about) {
-            startActivity(new Intent(this, About.class));
-            // מעבר למסך About.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            About.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_login) {
-            startActivity(new Intent(this, Login.class));
-            // מעבר למסך התחברות.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            Login.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_register) {
-            startActivity(new Intent(this, Register.class));
-            // מעבר למסך הרשמה.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            Register.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_user_home) {
-            startActivity(new Intent(this, UserPage.class));
-            // מעבר לעמוד המשתמש.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            UserPage.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_my_reservations) {
-            startActivity(new Intent(this, MyReservationsActivity.class));
-            // מעבר למסך ההזמנות שלי.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            MyReservationsActivity.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_profile) {
-            startActivity(new Intent(this, ProfileActivity.class));
-            // מעבר למסך פרופיל.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            ProfileActivity.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_admin_home) {
-            if (blockIfNotAdmin()) return true;
-            // בודק הרשאת מנהל לפני כניסה.
 
-            startActivity(new Intent(this, AdminPage.class));
-            // מעבר לעמוד המנהל.
+            if (blockIfNotAdmin())
+                return true;
+            // בודק שהמשתמש מנהל.
+
+            startActivity(
+                    new Intent(
+                            this,
+                            AdminPage.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_add_court) {
-            if (blockIfNotAdmin()) return true;
-            // בודק הרשאת מנהל לפני הוספת מגרש.
 
-            startActivity(new Intent(this, AddItem.class));
-            // מעבר למסך הוספת מגרש.
+            if (blockIfNotAdmin())
+                return true;
+
+            startActivity(
+                    new Intent(
+                            this,
+                            AddItem.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_show_users) {
-            if (blockIfNotAdmin()) return true;
-            // בודק הרשאת מנהל לפני הצגת משתמשים.
 
-            startActivity(new Intent(this, ShowUsers.class));
-            // מעבר למסך רשימת משתמשים.
+            if (blockIfNotAdmin())
+                return true;
+
+            startActivity(
+                    new Intent(
+                            this,
+                            ShowUsers.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_manage_courts) {
-            if (blockIfNotAdmin()) return true;
-            // בודק הרשאת מנהל לפני ניהול מגרשים.
 
-            startActivity(new Intent(this, ManageCourtsActivity.class));
-            // מעבר למסך ניהול מגרשים.
+            if (blockIfNotAdmin())
+                return true;
+
+            startActivity(
+                    new Intent(
+                            this,
+                            ManageCourtsActivity.class
+                    )
+            );
 
             return true;
         }
 
         if (id == R.id.menu_logout) {
+            // מופעל כאשר המשתמש לוחץ Logout.
+
             FirebaseAuth.getInstance().signOut();
             // מנתק את המשתמש מ-Firebase.
 
-            Intent intent = new Intent(this, MainActivity.class);
-            // יוצר מעבר למסך הראשי.
+            SessionManager.clearSession(this);
+            // מוחק את כל המידע שנשמר ב-SharedPreferences.
+            // זה התיקון החשוב שחסר אצלך.
 
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            // מנקה את היסטוריית המסכים כדי שלא יחזור אחורה לעמודים מוגנים.
+            Intent intent =
+                    new Intent(
+                            this,
+                            MainActivity.class
+                    );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            | Intent.FLAG_ACTIVITY_NEW_TASK
+            );
+            // מנקה את כל המסכים הפתוחים.
 
             startActivity(intent);
-            // פותח את המסך הראשי.
+            // חוזר למסך הראשי.
 
             finish();
             // סוגר את המסך הנוכחי.
@@ -319,6 +410,5 @@ public abstract class BaseMenuActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-        // אם לא נמצא פריט מתאים, נותן למחלקת האב לטפל בזה.
     }
 }

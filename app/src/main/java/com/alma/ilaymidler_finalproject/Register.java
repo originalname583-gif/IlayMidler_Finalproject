@@ -2,9 +2,7 @@ package com.alma.ilaymidler_finalproject;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,250 +15,275 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.alma.ilaymidler_finalproject.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class Register extends BaseMenuActivity implements View.OnClickListener {
 
     private static final String TAG = "Register";
-    // שם קבוע שמשמש לזיהוי הודעות Log של המסך הזה.
+    // משמש להודעות Log לצורך בדיקות.
 
-    private EditText etFname, etLname, etMail, etPhone, etPassword;
-    // שדות טקסט שהמשתמש ממלא בהרשמה.
+    private EditText etFname;
+    // שדה שם פרטי.
+
+    private EditText etLname;
+    // שדה שם משפחה.
+
+    private EditText etMail;
+    // שדה אימייל.
+
+    private EditText etPhone;
+    // שדה טלפון.
+
+    private EditText etPassword;
+    // שדה סיסמה.
 
     private Button btnSubmit;
-    // כפתור ההרשמה.
+    // כפתור הרשמה.
 
     private DatabaseService databaseService;
-    // השירות שאחראי על שמירה וקריאה מ-Firebase Database.
+    // גישה למסד הנתונים.
 
     private FirebaseAuth mAuth;
-    // השירות שאחראי על הרשמה והתחברות דרך Firebase Authentication.
+    // גישה למערכת ההתחברות של Firebase.
 
     private boolean registerInProgress = false;
-    // מונע מהמשתמש ללחוץ כמה פעמים על כפתור ההרשמה.
+    // מונע לחיצות כפולות על כפתור הרשמה.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // הפונקציה הראשונה שרצה כשהמסך נפתח.
+
         super.onCreate(savedInstanceState);
-        // מפעיל את onCreate של המחלקה האב.
 
         EdgeToEdge.enable(this);
-        // מאפשר לעיצוב להיכנס עד קצוות המסך.
+        // מאפשר שימוש מלא בשטח המסך.
 
         setContentView(R.layout.activity_register);
-        // טוען את קובץ העיצוב של מסך ההרשמה.
+        // מציג את מסך ההרשמה.
 
         setupToolbar(R.id.topToolbar, "Register");
-        // מגדיר Toolbar עם הכותרת Register.
+        // מציג את התפריט העליון.
 
         View mainView = findViewById(R.id.main);
-        // מחפש את ה-Layout הראשי במסך.
 
         if (mainView != null) {
+
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-                // מתאים את הריווח של המסך לפי הפס העליון והתחתון של המכשיר.
 
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                // מקבל את הגודל של אזורי המערכת.
+                Insets systemBars =
+                        insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                // לוקח את הגודל של שורת המצב והניווט.
 
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                // מוסיף ריווח כדי שהתוכן לא ייכנס מתחת לסטטוס בר או ניווט.
+                v.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
+                // מוסיף רווחים כדי שלא יהיו חפיפות.
 
                 return insets;
-                // מחזיר את ה-insets לאחר הטיפול.
             });
         }
 
         databaseService = DatabaseService.getInstance();
-        // מקבל את DatabaseService כדי לשמור משתמש חדש במסד.
+        // מקבל גישה למסד הנתונים.
 
         mAuth = FirebaseAuth.getInstance();
-        // מקבל את FirebaseAuth כדי ליצור משתמש חדש.
+        // מקבל גישה ל-Firebase Authentication.
 
         etFname = findViewById(R.id.etFirstName);
-        // מחבר את שדה השם הפרטי מה-XML לקוד.
+        // מחבר את שדה השם הפרטי.
 
         etLname = findViewById(R.id.etLastName);
-        // מחבר את שדה שם המשפחה מה-XML לקוד.
+        // מחבר את שדה שם המשפחה.
 
         etMail = findViewById(R.id.etEmail);
-        // מחבר את שדה האימייל מה-XML לקוד.
+        // מחבר את שדה האימייל.
 
         etPhone = findViewById(R.id.etPhone);
-        // מחבר את שדה הטלפון מה-XML לקוד.
+        // מחבר את שדה הטלפון.
 
         etPassword = findViewById(R.id.etPassword);
-        // מחבר את שדה הסיסמה מה-XML לקוד.
+        // מחבר את שדה הסיסמה.
 
         btnSubmit = findViewById(R.id.btnRegister);
-        // מחבר את כפתור ההרשמה מה-XML לקוד.
+        // מחבר את כפתור ההרשמה.
 
         btnSubmit.setOnClickListener(this);
-        // מגדיר שהמסך הזה יטפל בלחיצה על כפתור הרשמה.
+        // כאשר לוחצים על הכפתור מפעילים את onClick().
     }
 
     @Override
     public void onClick(View v) {
-        // הפונקציה מופעלת כאשר המשתמש לוחץ על כפתור ההרשמה.
-
-        if (v.getId() == R.id.btnRegister) {
-            validateAndRegister();
-            // אם נלחץ כפתור ההרשמה, בודקים את הנתונים ומרשמים.
-        }
-    }
-
-    private void validateAndRegister() {
-        // הפונקציה בודקת שהנתונים תקינים לפני הרשמה.
+        // מופעל כאשר לוחצים על כפתור ההרשמה.
 
         if (registerInProgress) {
             return;
-            // אם כבר מתבצעת הרשמה, לא מאפשרים לחיצה נוספת.
+            // אם כבר מתבצעת הרשמה לא מתחילים עוד אחת.
         }
 
         String fName = etFname.getText().toString().trim();
-        // לוקח את השם הפרטי מהשדה.
+        // לוקח את השם הפרטי.
 
         String lName = etLname.getText().toString().trim();
-        // לוקח את שם המשפחה מהשדה.
+        // לוקח את שם המשפחה.
 
         String email = etMail.getText().toString().trim();
-        // לוקח את האימייל מהשדה.
+        // לוקח את האימייל.
 
         String phone = etPhone.getText().toString().trim();
-        // לוקח את מספר הטלפון מהשדה.
+        // לוקח את הטלפון.
 
         String password = etPassword.getText().toString().trim();
-        // לוקח את הסיסמה מהשדה.
+        // לוקח את הסיסמה.
 
-        if (TextUtils.isEmpty(fName)) {
+        if (fName.isEmpty()) {
             etFname.setError("Enter first name");
             return;
-            // אם השם הפרטי ריק, מציג שגיאה.
         }
 
-        if (TextUtils.isEmpty(lName)) {
+        if (lName.isEmpty()) {
             etLname.setError("Enter last name");
             return;
-            // אם שם המשפחה ריק, מציג שגיאה.
         }
 
-        if (TextUtils.isEmpty(email)) {
+        if (email.isEmpty()) {
             etMail.setError("Enter email");
             return;
-            // אם האימייל ריק, מציג שגיאה.
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etMail.setError("Invalid email");
-            return;
-            // אם האימייל לא בפורמט תקין, מציג שגיאה.
-        }
-
-        if (TextUtils.isEmpty(phone)) {
+        if (phone.isEmpty()) {
             etPhone.setError("Enter phone");
             return;
-            // אם הטלפון ריק, מציג שגיאה.
         }
 
-        if (phone.length() < 9) {
-            etPhone.setError("Invalid phone");
-            return;
-            // אם הטלפון קצר מדי, מציג שגיאה.
-        }
-
-        if (TextUtils.isEmpty(password)) {
+        if (password.isEmpty()) {
             etPassword.setError("Enter password");
             return;
-            // אם הסיסמה ריקה, מציג שגיאה.
-        }
-
-        if (password.length() < 6) {
-            etPassword.setError("Password must be at least 6 characters");
-            return;
-            // Firebase דורש סיסמה באורך מינימלי של 6 תווים.
         }
 
         registerUser(fName, lName, phone, email, password);
-        // אם הכל תקין, מתחילים הרשמה.
+        // מתחיל את תהליך ההרשמה.
     }
 
-    private void registerUser(String fname, String lname, String phone, String email, String password) {
+    private void registerUser(String fname,
+                              String lname,
+                              String phone,
+                              String email,
+                              String password) {
+
         // הפונקציה יוצרת משתמש חדש ב-Firebase Authentication.
 
         registerInProgress = true;
-        // מסמן שהתחילה הרשמה.
+        // מסמן שההרשמה התחילה.
 
         btnSubmit.setEnabled(false);
-        // מבטל זמנית את הכפתור כדי למנוע לחיצות כפולות.
+        // מבטל את הכפתור זמנית.
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(authTask -> {
-                    // שולח בקשה ל-Firebase ליצור משתמש חדש.
 
-                    if (!authTask.isSuccessful() || mAuth.getCurrentUser() == null) {
+                    if (!authTask.isSuccessful()
+                            || mAuth.getCurrentUser() == null) {
+
                         registerInProgress = false;
                         // מסמן שההרשמה הסתיימה.
 
                         btnSubmit.setEnabled(true);
-                        // מחזיר את הכפתור לפעולה.
+                        // מחזיר את הכפתור לפעילות.
 
-                        Toast.makeText(Register.this, "Email already exists or invalid!", Toast.LENGTH_SHORT).show();
-                        // מציג הודעה אם האימייל כבר קיים או לא תקין.
+                        Toast.makeText(
+                                Register.this,
+                                "Email already exists or invalid",
+                                Toast.LENGTH_SHORT
+                        ).show();
 
-                        Log.e(TAG, "FirebaseAuth Error: ", authTask.getException());
-                        // מדפיס את השגיאה ל-Logcat.
+                        Log.e(TAG,
+                                "FirebaseAuth Error",
+                                authTask.getException());
 
                         return;
-                        // עוצר את הפונקציה.
                     }
 
-                    String uid = mAuth.getCurrentUser().getUid();
-                    // מקבל את מזהה המשתמש החדש מ-FirebaseAuth.
+                    String uid =
+                            mAuth.getCurrentUser().getUid();
+                    // לוקח את ה-uid של המשתמש החדש.
 
-                    User user = new User(uid, fname, lname, email, phone, password, false);
-                    // יוצר אובייקט משתמש חדש.
-                    // false אומר שהמשתמש הוא לא מנהל.
+                    User user =
+                            new User(
+                                    uid,
+                                    fname,
+                                    lname,
+                                    email,
+                                    phone,
+                                    password,
+                                    false
+                            );
+                    // יוצר אובייקט משתמש.
 
                     createUserInDatabase(user);
-                    // שומר את פרטי המשתמש ב-Firebase Database.
+                    // שומר את המשתמש במסד הנתונים.
                 });
     }
 
     private void createUserInDatabase(User user) {
-        // הפונקציה שומרת את המשתמש החדש ב-Firebase Realtime Database.
+        // שומר את המשתמש ב-Realtime Database.
 
-        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
-            // שולח את המשתמש לשמירה במסד.
+        databaseService.createNewUser(
+                user,
+                new DatabaseService.DatabaseCallback<Void>() {
 
-            @Override
-            public void onCompleted(Void object) {
-                registerInProgress = false;
-                // מסמן שההרשמה הסתיימה.
+                    @Override
+                    public void onCompleted(Void object) {
 
-                btnSubmit.setEnabled(true);
-                // מחזיר את כפתור ההרשמה לפעולה.
+                        registerInProgress = false;
+                        // מסמן שסיימנו הרשמה.
 
-                Toast.makeText(Register.this, "Registration successful", Toast.LENGTH_SHORT).show();
-                // מציג הודעת הצלחה.
+                        btnSubmit.setEnabled(true);
+                        // מחזיר את הכפתור לפעילות.
 
-                startActivity(new Intent(Register.this, UserPage.class));
-                // מעביר את המשתמש לעמוד המשתמש.
+                        SessionManager.saveUser(
+                                Register.this,
+                                user
+                        );
+                        // שומר את כל פרטי המשתמש ב-SharedPreferences.
+                        // זה התיקון החשוב שחסר אצלך.
 
-                finish();
-                // סוגר את מסך ההרשמה.
-            }
+                        Toast.makeText(
+                                Register.this,
+                                "Registration successful",
+                                Toast.LENGTH_SHORT
+                        ).show();
 
-            @Override
-            public void onFailed(Exception e) {
-                registerInProgress = false;
-                // מסמן שההרשמה הסתיימה גם אם נכשלה.
+                        startActivity(
+                                new Intent(
+                                        Register.this,
+                                        UserPage.class
+                                )
+                        );
+                        // מעביר לדף המשתמש.
 
-                btnSubmit.setEnabled(true);
-                // מחזיר את הכפתור לפעולה.
+                        finish();
+                        // סוגר את מסך ההרשמה.
+                    }
 
-                Toast.makeText(Register.this, "Failed to register user", Toast.LENGTH_SHORT).show();
-                // מציג הודעת שגיאה.
-            }
-        });
+                    @Override
+                    public void onFailed(Exception e) {
+
+                        registerInProgress = false;
+                        // מסמן שהפעולה הסתיימה.
+
+                        btnSubmit.setEnabled(true);
+                        // מחזיר את הכפתור לפעילות.
+
+                        Toast.makeText(
+                                Register.this,
+                                "Failed to register user",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
     }
 }

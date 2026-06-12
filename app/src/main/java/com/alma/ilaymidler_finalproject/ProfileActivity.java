@@ -8,154 +8,213 @@ import android.widget.Toast;
 
 import com.alma.ilaymidler_finalproject.Model.User;
 import com.alma.ilaymidler_finalproject.services.DatabaseService;
+import com.alma.ilaymidler_finalproject.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class ProfileActivity extends BaseMenuActivity {
 
-    private TextView tvFullName, tvEmail, tvPhone, tvRole, tvEmpty;
-    // טקסטים שמציגים את פרטי המשתמש ואת הודעת השגיאה/ריק.
+    private TextView tvFullName;
+    // מציג את השם המלא.
+
+    private TextView tvEmail;
+    // מציג את האימייל.
+
+    private TextView tvPhone;
+    // מציג את הטלפון.
+
+    private TextView tvRole;
+    // מציג אם המשתמש Admin או User.
+
+    private TextView tvEmpty;
+    // מציג הודעות שגיאה.
 
     private ProgressBar progressBar;
-    // סימן טעינה בזמן שמביאים את הפרופיל מ-Firebase.
+    // גלגל טעינה בזמן שליפת נתונים.
 
     private DatabaseService databaseService;
-    // השירות שאחראי על פעולות מול Firebase.
+    // גישה למסד הנתונים.
 
     private boolean loadingInProgress = false;
-    // מונע טעינה כפולה של הפרופיל באותו זמן.
+    // מונע טעינות כפולות.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // הפונקציה הראשונה שרצה כשהמסך נפתח.
+
         super.onCreate(savedInstanceState);
-        // מפעיל את onCreate של המחלקה האב.
 
         setContentView(R.layout.activity_profile);
-        // טוען את קובץ העיצוב של מסך הפרופיל.
+        // מציג את מסך הפרופיל.
 
         setupToolbar(R.id.topToolbar, "My Profile");
-        // מגדיר Toolbar עם הכותרת My Profile.
+        // מפעיל את התפריט העליון.
 
         tvFullName = findViewById(R.id.tvFullName);
-        // מחבר את שדה השם המלא מה-XML לקוד.
+        // מחבר את תצוגת השם.
 
         tvEmail = findViewById(R.id.tvEmail);
-        // מחבר את שדה האימייל מה-XML לקוד.
+        // מחבר את תצוגת האימייל.
 
         tvPhone = findViewById(R.id.tvPhone);
-        // מחבר את שדה הטלפון מה-XML לקוד.
+        // מחבר את תצוגת הטלפון.
 
         tvRole = findViewById(R.id.tvRole);
-        // מחבר את שדה התפקיד מה-XML לקוד.
+        // מחבר את תצוגת התפקיד.
 
         tvEmpty = findViewById(R.id.tvEmpty);
-        // מחבר את הודעת השגיאה/ריק מה-XML לקוד.
+        // מחבר את תצוגת השגיאות.
 
         progressBar = findViewById(R.id.progressBar);
-        // מחבר את סימן הטעינה מה-XML לקוד.
+        // מחבר את גלגל הטעינה.
 
         databaseService = DatabaseService.getInstance();
-        // מקבל את DatabaseService כדי לקרוא נתונים מ-Firebase.
+        // מקבל גישה למסד הנתונים.
+
+        showSavedProfile();
+        // מציג קודם את הנתונים שנשמרו ב-SharedPreferences.
     }
 
     @Override
     protected void onResume() {
+        // רץ בכל פעם שחוזרים למסך.
+
         super.onResume();
-        // מופעל בכל פעם שחוזרים למסך הפרופיל.
 
         loadProfile();
-        // טוען את פרטי המשתמש מחדש.
+        // טוען את הנתונים העדכניים מ-Firebase.
+    }
+
+    private void showSavedProfile() {
+        // מציג את הנתונים ששמורים בטלפון.
+
+        String fullName =
+                (SessionManager.getFirstName(this)
+                        + " "
+                        + SessionManager.getLastName(this))
+                        .trim();
+        // מחבר שם פרטי ושם משפחה.
+
+        tvFullName.setText(
+                fullName.isEmpty()
+                        ? "No name"
+                        : fullName
+        );
+        // מציג שם מלא.
+
+        tvEmail.setText(
+                SessionManager.getEmail(this).isEmpty()
+                        ? "No email"
+                        : SessionManager.getEmail(this)
+        );
+        // מציג אימייל.
+
+        tvPhone.setText(
+                SessionManager.getPhone(this).isEmpty()
+                        ? "No phone"
+                        : SessionManager.getPhone(this)
+        );
+        // מציג טלפון.
+
+        tvRole.setText(
+                SessionManager.isAdmin(this)
+                        ? "Admin"
+                        : "User"
+        );
+        // מציג סוג משתמש.
     }
 
     private void loadProfile() {
-        // הפונקציה טוענת את פרטי הפרופיל של המשתמש המחובר.
+        // טוען את הפרופיל מ-Firebase.
 
         if (loadingInProgress) {
             return;
-            // אם כבר יש טעינה פעילה, לא מתחילים אחת נוספת.
+            // אם כבר יש טעינה פעילה עוצרים.
         }
 
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        // מקבל את המשתמש שמחובר כרגע.
+        FirebaseUser firebaseUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+        // לוקח את המשתמש המחובר.
 
         if (firebaseUser == null) {
-            Toast.makeText(this, "You must log in first", Toast.LENGTH_SHORT).show();
-            // אם אין משתמש מחובר, מציג הודעה.
+
+            Toast.makeText(
+                    this,
+                    "You must log in first",
+                    Toast.LENGTH_SHORT
+            ).show();
 
             finish();
-            // סוגר את מסך הפרופיל.
+            // סוגר את המסך אם אין משתמש מחובר.
 
             return;
-            // עוצר את הפונקציה.
         }
 
         loadingInProgress = true;
         // מסמן שהתחילה טעינה.
 
-        String userId = firebaseUser.getUid();
-        // שומר את מזהה המשתמש המחובר.
-
         progressBar.setVisibility(View.VISIBLE);
-        // מציג טעינה.
+        // מציג גלגל טעינה.
 
         tvEmpty.setVisibility(View.GONE);
-        // מסתיר הודעת שגיאה/ריק בזמן טעינה.
+        // מסתיר הודעות שגיאה.
 
-        databaseService.getUser(userId, new DatabaseService.DatabaseCallback<User>() {
-            // מביא את המשתמש מה-Database לפי ה-id שלו.
+        databaseService.getUser(
+                firebaseUser.getUid(),
+                new DatabaseService.DatabaseCallback<User>() {
 
-            @Override
-            public void onCompleted(User user) {
-                loadingInProgress = false;
-                // מסמן שהטעינה הסתיימה.
+                    @Override
+                    public void onCompleted(User user) {
 
-                progressBar.setVisibility(View.GONE);
-                // מסתיר טעינה.
+                        loadingInProgress = false;
+                        // מסמן שהטעינה הסתיימה.
 
-                if (user == null) {
-                    tvEmpty.setVisibility(View.VISIBLE);
-                    // מציג הודעת שגיאה.
+                        progressBar.setVisibility(View.GONE);
+                        // מסתיר את גלגל הטעינה.
 
-                    tvEmpty.setText("Something went wrong while loading your profile.");
-                    // כותב הודעת שגיאה.
+                        if (user == null) {
 
-                    return;
-                    // עוצר את הפונקציה.
-                }
+                            tvEmpty.setVisibility(View.VISIBLE);
 
-                String fullName = (user.getFirstName() + " " + user.getLastName()).trim();
-                // בונה שם מלא מהשם הפרטי ושם המשפחה.
+                            tvEmpty.setText(
+                                    "Something went wrong while loading your profile."
+                            );
 
-                tvFullName.setText(fullName.isEmpty() ? "No name" : fullName);
-                // מציג שם מלא או No name אם אין שם.
+                            return;
+                        }
 
-                tvEmail.setText(user.getEmail().isEmpty() ? "No email" : user.getEmail());
-                // מציג אימייל או No email אם אין.
+                        SessionManager.saveUser(
+                                ProfileActivity.this,
+                                user
+                        );
+                        // מעדכן את SharedPreferences לפי הנתונים ב-Firebase.
 
-                tvPhone.setText(user.getPhone().isEmpty() ? "No phone" : user.getPhone());
-                // מציג טלפון או No phone אם אין.
+                        showSavedProfile();
+                        // מציג את הנתונים המעודכנים.
+                    }
 
-                tvRole.setText(user.isAdmin() ? "Admin" : "User");
-                // מציג האם המשתמש הוא מנהל או משתמש רגיל.
-            }
+                    @Override
+                    public void onFailed(Exception e) {
 
-            @Override
-            public void onFailed(Exception e) {
-                loadingInProgress = false;
-                // מסמן שהטעינה הסתיימה גם אם נכשלה.
+                        loadingInProgress = false;
+                        // מסמן שהטעינה הסתיימה.
 
-                progressBar.setVisibility(View.GONE);
-                // מסתיר טעינה.
+                        progressBar.setVisibility(View.GONE);
+                        // מסתיר את גלגל הטעינה.
 
-                tvEmpty.setVisibility(View.VISIBLE);
-                // מציג הודעת שגיאה.
+                        tvEmpty.setVisibility(View.VISIBLE);
 
-                tvEmpty.setText("Something went wrong while loading your profile.");
-                // שם טקסט שגיאה.
+                        tvEmpty.setText(
+                                "Something went wrong while loading your profile."
+                        );
+                        // מציג הודעת שגיאה.
 
-                Toast.makeText(ProfileActivity.this, "Failed to load profile", Toast.LENGTH_SHORT).show();
-                // מציג הודעת Toast.
-            }
-        });
+                        Toast.makeText(
+                                ProfileActivity.this,
+                                "Failed to load profile",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
     }
 }
